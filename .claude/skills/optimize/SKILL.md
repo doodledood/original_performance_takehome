@@ -55,5 +55,13 @@ Log to `optimization_progress.txt` in root directory.
 ## Log Format
 
 ```
-Gen N: best=XXXX avg=XXXX [001:XXXX, 002:XXXX, ...]
+=== Generation N ===
+Best: XXXX cycles | Avg: XXXX cycles
+
+Candidates:
+  001: XXXX cycles - [approach summary from agent]
+  002: XXXX cycles - [approach summary from agent]
+  ...
 ```
+
+Record the one-line summary returned by each agent (mutation or crossover description).
