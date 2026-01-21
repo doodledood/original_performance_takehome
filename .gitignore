@@ -3,24 +3,3 @@ trace.json
 **/__pycache__
 .hypothesis
 .DS_Store
-
-# Optimization artifacts (generated at runtime)
-# These are intentionally untracked to allow multi-session progress.
-# Candidates, scores, and state files persist across sessions so optimization
-# can be resumed after interruption. Delete these to start fresh.
-
-# GA (Genetic Algorithm) artifacts
-ga/candidates/CAND_*
-ga/candidates/scores.txt
-ga/candidates/eval_cache.txt
-ga/best/
-ga/optimization_progress.txt
-
-# SA (Simulated Annealing) artifacts
-sa/candidates/CAND_*
-sa/candidates/scores.txt
-sa/candidates/eval_cache.txt
-sa/candidates/state.txt
-sa/candidates/history.txt
-sa/best/
-sa/optimization_progress.txt
