@@ -9,7 +9,7 @@
 
 set -e
 
-INITIAL_TEMP="${1:-1000}"
+INITIAL_TEMP="${1:-5000}"
 FORCE=""
 
 # Check for --force flag

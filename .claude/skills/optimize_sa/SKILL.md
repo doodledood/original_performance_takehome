@@ -10,11 +10,30 @@ Optimize `build_kernel()` using simulated annealing with the mutate agent.
 
 ## Parameters (from $ARGUMENTS, format: --key=value)
 
-- `--initial-temp=1000` - starting temperature
-- `--final-temp=1` - stopping temperature
-- `--cooling-rate=0.95` - multiplicative cooling factor (T' = T * rate)
-- `--iterations-per-temp=3` - perturbations per temperature level
-- `--max-iterations=200` - hard limit on total iterations
+- `--initial-temp=5000` - starting temperature (high enough for ~80% acceptance of bad moves)
+- `--final-temp=10` - stopping temperature (low enough that only improvements accepted)
+- `--cooling-rate=0.95` - multiplicative cooling factor (T' = T * rate), range 0.85-0.99
+- `--iterations-per-temp=5` - perturbations per temperature level (Markov chain length)
+- `--max-iterations=500` - hard limit on total iterations
+
+### Parameter Tuning Guide
+
+**Initial Temperature**: Should allow ~80% acceptance of "bad" moves initially.
+- Formula: `T = typical_delta / -ln(0.8)` where typical_delta is expected cost difference
+- For kernel optimization with deltas of ~1000 cycles: T ≈ 4500-5000
+
+**Final Temperature**: Should be low enough that only improvements are accepted.
+- Formula: `T = small_delta / -ln(0.01)` for 1% acceptance of small worsening
+- For deltas of ~100 cycles: T ≈ 20-25, so T=10 is conservative
+
+**Cooling Rate**: Controls exploration vs exploitation tradeoff.
+- 0.99 = very slow cooling, more exploration, longer runtime
+- 0.95 = balanced (recommended)
+- 0.90 = faster cooling, may miss global optimum
+- 0.85 = aggressive, risk of premature convergence
+
+**Temperature Levels**: With defaults, `5000 * 0.95^n = 10` gives n ≈ 121 levels.
+Total iterations: 121 × 5 = 605 (capped by max_iterations=500)
 
 ## Algorithm Overview
 
