@@ -133,8 +133,8 @@ while TEMPERATURE > FINAL_TEMP and ITERATION < MAX_ITERATIONS:
 
         # 3a. Generate neighbor
         # 3b. Evaluate neighbor
-        # 3c. Accept/reject decision
-        # 3d. Update best if needed
+        # 3c. Update best (BEFORE accept/reject!)
+        # 3d. Accept/reject decision
         # 3e. Log iteration
 
     # 3f. Cool down
@@ -167,7 +167,17 @@ The mutate agent will:
 NEIGHBOR_SCORE=$(./sa/scripts/eval_candidate.sh NEIGHBOR)
 ```
 
-#### 3c. Accept/Reject Decision
+#### 3c. Update Best (BEFORE accept/reject!)
+
+**IMPORTANT**: Check if neighbor is better than all-time best BEFORE accept/reject.
+We might reject a neighbor that's still our best solution ever!
+
+```bash
+# Save to BEST if this is the best we've ever seen (regardless of accept/reject)
+./sa/scripts/update_best.sh $NEIGHBOR_SCORE
+```
+
+#### 3d. Accept/Reject Decision
 
 ```bash
 # Get current score from state
@@ -181,16 +191,6 @@ if [ "$DECISION" = "ACCEPT" ]; then
     ./sa/scripts/accept_neighbor.sh $NEIGHBOR_SCORE
 else
     ./sa/scripts/reject_neighbor.sh
-fi
-```
-
-#### 3d. Update Best
-
-If we accepted the neighbor, check if it's a new best:
-
-```bash
-if [ "$DECISION" = "ACCEPT" ]; then
-    ./sa/scripts/update_best.sh $NEIGHBOR_SCORE
 fi
 ```
 
