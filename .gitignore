@@ -2,3 +2,8 @@ trace.json
 **/*.pyc
 .hypothesis
 .DS_Store
+
+# GA optimization runtime artifacts
+candidates/
+best/
+optimization_progress.txt
