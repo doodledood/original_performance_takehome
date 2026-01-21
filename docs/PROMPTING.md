@@ -1,5 +1,7 @@
 # Writing Skill and Agent Prompts
 
+> **IMPORTANT:** Read this document before creating or updating any prompts, skills, or agent configurations in this repository.
+
 A prompt should act as a manifest for the agent: clear goal, clear constraints, freedom in execution.
 
 ## Principles
