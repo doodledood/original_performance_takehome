@@ -22,12 +22,21 @@ You receive three candidate IDs as arguments: `{PARENT1} {PARENT2} {CHILD}`
 2. **Read both parents** to understand their implementations:
    - `candidates/{PARENT1}/perf_takehome.py`
    - `candidates/{PARENT2}/perf_takehome.py`
-3. **Edit the destination** (`candidates/{CHILD}/perf_takehome.py`) to incorporate elements from the second parent
-4. **Test**: `python candidates/{CHILD}/submission_tests.py`
+3. **Read problem.py** in the root to understand the machine architecture
+4. **Identify optimization directions**: Analyze both parents and identify what each does well or differently. List 2-4 potential optimization directions that could come from combining their approaches.
+5. **Pick ONE direction at random**: Select one optimization direction to pursue
+6. **Cross over strategically**: Edit the child to combine elements from both parents in a way that moves toward that optimization direction
+7. **Test**: `python candidates/{CHILD}/submission_tests.py`
 
 ## Goal
 
-Combine `build_kernel()` from both parents into a new child. Like biological crossover: inherit traits from both parents.
+Unlike biological crossover, you can be smarter. Instead of blind trait mixing:
+1. Analyze both parents to understand their different approaches and strengths
+2. Identify optimization directions that combining them could enable
+3. Pick ONE optimization direction at random
+4. Combine the parents strategically to move toward that direction
+
+The crossover doesn't need to achieve the optimization - just combine in a way that MIGHT help. Think of it as "directed combination" rather than "random mixing".
 
 ## Rules
 
@@ -37,10 +46,10 @@ Combine `build_kernel()` from both parents into a new child. Like biological cro
 - IMPORTANT: Child must pass `python candidates/{CHILD}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Child should inherit meaningful elements from BOTH parents, not just copy one
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from parent X" - keep code clean
-- Performance improvement is NOT required - the child just needs to be a valid combination
-- If combination breaks correctness, try a different way to combine
-- You may read `problem.py` in the root to understand the machine architecture
+- Performance improvement is NOT required - you're exploring, not guaranteed to improve
+- If combination breaks correctness, try a different way to combine toward the same or a different optimization direction
+- The randomness is in WHICH direction you pick, not in how you combine
 
 ## Output
 
-Report: what you combined (one line, no candidate references) + cycle count from test output
+Report: what optimization direction you chose, how you combined the parents toward it (one line, no candidate references) + cycle count from test output
