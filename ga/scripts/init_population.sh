@@ -1,6 +1,6 @@
 #!/bin/bash
 # Initialize a population of N candidates
-# Usage: scripts/init_population.sh <n>
+# Usage: ga/scripts/init_population.sh <n>
 # Output: "Created N candidates"
 
 if [ -z "$1" ]; then

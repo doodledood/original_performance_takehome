@@ -32,7 +32,7 @@ fi
 cp -r "$SOURCE_DIR" "$DEST_DIR"
 
 # Update the import in submission_tests.py to point to the new candidate
-sed -i "s|from candidates.CAND_$SOURCE_ID.perf_takehome import|from candidates.CAND_$DEST_ID.perf_takehome import|" "$DEST_DIR/submission_tests.py"
+sed -i "s|from ga.candidates.CAND_$SOURCE_ID.perf_takehome import|from ga.candidates.CAND_$DEST_ID.perf_takehome import|" "$DEST_DIR/submission_tests.py"
 
 # Ensure __init__.py exists
 touch "$DEST_DIR/__init__.py"
