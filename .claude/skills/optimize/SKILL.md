@@ -16,16 +16,24 @@ Optimize `build_kernel()` using genetic algorithm with mutate and crossover agen
 - `--crossover-rate=0.8` - probability of crossover
 - `--mutation-rate=0.2` - probability of mutation
 
+## Progress File
+
+Log to `optimization_progress.txt` in root directory.
+
+**On start**: If `optimization_progress.txt` exists, read it to understand prior progress and continue from there.
+
 ## Helper Scripts
 
+- `./scripts/init_candidate.sh {id}` - initialize candidate folder
 - `./scripts/should_crossover.sh {rate}` - exits 0 if should crossover, 1 if not
 - `./scripts/should_mutate.sh {rate}` - exits 0 if should mutate, 1 if not
 
 ## Workflow
 
-1. **Initialize**: Run `./scripts/init_candidate.sh {id}` for candidates 001..N
-2. **Evaluate**: Run `python candidates/{id}/submission_tests.py` to get cycle counts
-3. **Per generation**:
+1. **Resume check**: Read `optimization_progress.txt` if exists
+2. **Initialize**: Run `./scripts/init_candidate.sh {id}` for candidates 001..N
+3. **Evaluate**: Run `python candidates/{id}/submission_tests.py` to get cycle counts
+4. **Per generation**:
    - Rank candidates by cycles (lower = better)
    - Keep top `elite` unchanged
    - For each non-elite slot:
@@ -33,7 +41,8 @@ Optimize `build_kernel()` using genetic algorithm with mutate and crossover agen
      - If crossover: select two parents from top half, create child
      - Use `./scripts/should_mutate.sh {rate}` to decide mutation
      - If mutate: apply mutation to candidate
-4. **Finish**: Copy best `perf_takehome.py` to root, report improvement
+   - Write generation results to `optimization_progress.txt`
+5. **Finish**: Copy best `perf_takehome.py` to root, report improvement
 
 ## Critical Rules
 
@@ -43,9 +52,8 @@ Optimize `build_kernel()` using genetic algorithm with mutate and crossover agen
   - mutate: `{id}`
   - crossover: `{parent1} {parent2} {child}`
 
-## Logging
+## Log Format
 
-Write to `/tmp/optimize-${CLAUDE_SESSION_ID}.log`:
 ```
 Gen N: best=XXXX avg=XXXX [001:XXXX, 002:XXXX, ...]
 ```
