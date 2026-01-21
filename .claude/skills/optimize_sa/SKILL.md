@@ -46,7 +46,8 @@ All scripts are in `./sa/scripts/`:
 
 | Script | Purpose | Output |
 |--------|---------|--------|
-| `init_solution.sh [temp]` | Initialize CURRENT and BEST | "Initialized with X cycles" |
+| `check_state.sh` | Check if state exists for resumption | State values or "NO_STATE" |
+| `init_solution.sh [temp] [--force]` | Initialize (skips if state exists) | "Initialized with X cycles" |
 | `accept_solution.sh {cur} {new} {temp}` | Metropolis criterion | "ACCEPT" or "REJECT" |
 | `accept_neighbor.sh {score}` | Move NEIGHBOR → CURRENT | Updates state |
 | `reject_neighbor.sh` | Delete NEIGHBOR, increment reject count | "Rejected neighbor" |
@@ -72,18 +73,27 @@ All scripts are in `./sa/scripts/`:
 
 ```bash
 # Check for existing state
-cat sa/candidates/state.txt 2>/dev/null
-ls sa/candidates/ 2>/dev/null
+./sa/scripts/check_state.sh
 ```
 
-If state exists, read ITERATION and TEMPERATURE to resume.
+**If state exists (exit code 0):**
+- Read ITERATION and TEMPERATURE from state.txt
+- Skip initialization
+- Resume loop from saved iteration
+- Log: `[RESUME] Continuing from iteration N at temperature T`
 
-Log: `[RESUME] Continuing from iteration N at temperature T` or `[START] Fresh SA run`
+**If no state (exit code 1):**
+- Proceed with fresh initialization
+- Log: `[START] Fresh SA run`
 
-### 2. Initialize (skip if CURRENT exists)
+### 2. Initialize (only if no state)
 
 ```bash
+# This automatically skips if state exists
 ./sa/scripts/init_solution.sh $INITIAL_TEMP
+
+# To force reset and start fresh:
+./sa/scripts/init_solution.sh $INITIAL_TEMP --force
 ```
 
 This creates:
