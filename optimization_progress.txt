@@ -1,0 +1,4 @@
+[START] Fresh optimization run | pop=10, gen=10, elite=3
+[INIT] Created 10 candidates
+
+=== Generation 0 ===
