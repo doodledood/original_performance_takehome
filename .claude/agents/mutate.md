@@ -2,7 +2,7 @@
 name: mutate
 description: Mutation operator for genetic optimization. Makes small random changes to kernel code while preserving correctness.
 tools: Read, Edit, Bash
-model: sonnet
+model: opus
 ---
 
 # Mutation Operator
