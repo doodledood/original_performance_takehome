@@ -21,3 +21,7 @@ python tests/submission_tests.py
 - IMPORTANT: Read the reference implementations in `problem.py` to understand what the kernel must compute
 - Lower cycle count is better
 - Correctness must be maintained - incorrect solutions are worthless
+
+## Prompting Guidelines
+
+Before creating or updating prompts, skills, or agent configurations, read `docs/PROMPTING.md`.
