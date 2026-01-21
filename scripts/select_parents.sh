@@ -31,7 +31,7 @@ POOL_SIZE=$(( (TOTAL + 1) / 2 ))  # Round up
 python3 << EOF
 import random
 
-random.seed($SEED)
+random.seed("$SEED")
 
 # Read scores (already sorted by cycles ascending)
 scores = []

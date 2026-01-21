@@ -47,6 +47,7 @@ All scripts are in `./scripts/`:
 | `select_parents.sh {seed}` | Tournament selection | Returns `{parent1} {parent2}` |
 | `should_crossover.sh {rate} {seed}` | Decide crossover | Exit 0=yes, 1=no |
 | `should_mutate.sh {rate} {seed}` | Decide mutation | Exit 0=yes, 1=no |
+| `parents_identical.sh {p1} {p2}` | Check if parents identical | Exit 0=identical, 1=different |
 
 ## Workflow
 
@@ -102,7 +103,12 @@ for SLOT in $NON_ELITE; do
   SEED="${GEN}_${SLOT}"
   if ./scripts/should_crossover.sh 0.8 $SEED; then
     PARENTS=$(./scripts/select_parents.sh $SEED)
-    # Queue crossover: $PARENTS -> $SLOT
+    P1=$(echo $PARENTS | cut -d' ' -f1)
+    P2=$(echo $PARENTS | cut -d' ' -f2)
+    # Skip crossover if parents are identical (would be pointless)
+    if ! ./scripts/parents_identical.sh $P1 $P2; then
+      # Queue crossover: $PARENTS -> $SLOT
+    fi
   fi
 
   MUTATE_SEED="${GEN}_${SLOT}_m"

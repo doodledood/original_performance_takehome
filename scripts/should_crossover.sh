@@ -6,5 +6,5 @@
 PROB="${1:-0.8}"
 SEED="${2:-$RANDOM}"
 
-RESULT=$(python3 -c "import random; random.seed($SEED); print(1 if random.random() < $PROB else 0)")
+RESULT=$(python3 -c "import random; random.seed('$SEED'); print(1 if random.random() < $PROB else 0)")
 exit $((1 - RESULT))
