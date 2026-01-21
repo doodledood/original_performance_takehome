@@ -1,5 +1,5 @@
 ---
-name: optimize
+name: optimize_ga
 description: Run genetic algorithm optimization on the kernel
 disable-model-invocation: true
 ---
@@ -27,12 +27,12 @@ This implementation uses a proper genetic algorithm with pool-based selection:
 
 ## Progress File
 
-Log to `optimization_progress.txt` in root directory. This file enables resumption after interruption.
+Log to `ga/optimization_progress.txt`. This file enables resumption after interruption.
 
 ### State Detection on Start
 
-1. **Read `optimization_progress.txt`** if it exists
-2. **Check for existing candidates** via `ls candidates/`
+1. **Read `ga/optimization_progress.txt`** if it exists
+2. **Check for existing candidates** via `ls ga/candidates/`
 3. **Determine resume point**:
    - No log file → fresh start
    - Log has `=== Generation N COMPLETE ===` → resume from generation N+1
@@ -41,7 +41,7 @@ Log to `optimization_progress.txt` in root directory. This file enables resumpti
 
 ## Helper Scripts
 
-All scripts are in `./scripts/`:
+All scripts are in `./ga/scripts/`:
 
 ### High-Level Scripts (use these)
 
@@ -52,7 +52,7 @@ All scripts are in `./scripts/`:
 | `update_score.sh {id} {cycles}` | Update single score | Re-sorts scores.txt |
 | `get_stats.sh [baseline]` | Get population stats | BEST/AVG/IMPROVEMENT lines |
 | `eval_candidate.sh {id}` | Evaluate single candidate | Cycle count |
-| `save_best.sh {id}` | Save best to `best/` | Copies perf_takehome.py |
+| `save_best.sh {id}` | Save best to `ga/best/` | Copies perf_takehome.py |
 | `select_survivors.sh {n}` | Keep top N, delete rest | KEPT/DELETED lists |
 | `copy_candidate.sh {src} {dest}` | Copy candidate folder | "Copied src to dest" |
 | `next_candidate_id.sh` | Get next available ID | Next ID (e.g., "011") |
@@ -74,8 +74,8 @@ All scripts are in `./scripts/`:
 
 ```bash
 # Check for existing state
-cat optimization_progress.txt 2>/dev/null
-ls candidates/ 2>/dev/null
+cat ga/optimization_progress.txt 2>/dev/null
+ls ga/candidates/ 2>/dev/null
 ```
 
 Log: `[RESUME] Starting from generation N` or `[START] Fresh optimization run`
@@ -83,7 +83,7 @@ Log: `[RESUME] Starting from generation N` or `[START] Fresh optimization run`
 ### 2. Initialize (skip if candidates exist)
 
 ```bash
-./scripts/init_population.sh 10
+./ga/scripts/init_population.sh 10
 ```
 
 Log: `[INIT] Created 10 candidates`
@@ -92,15 +92,15 @@ Log: `[INIT] Created 10 candidates`
 
 ```bash
 # Evaluate one candidate (all are identical baseline)
-BASELINE=$(./scripts/eval_candidate.sh 001)
+BASELINE=$(./ga/scripts/eval_candidate.sh 001)
 
 # Set all scores to baseline
 for id in 001 002 ... 010; do
-  ./scripts/update_score.sh $id $BASELINE
+  ./ga/scripts/update_score.sh $id $BASELINE
 done
 
 # Save best
-./scripts/save_best.sh 001
+./ga/scripts/save_best.sh 001
 ```
 
 Log baseline and write `=== Generation 0 COMPLETE ===`
@@ -112,7 +112,7 @@ For each generation 1 to N:
 #### 4a. Get the Plan
 
 ```bash
-./scripts/plan_generation.sh $GEN $NUM_OFFSPRING $CROSSOVER_RATE $MUTATION_RATE
+./ga/scripts/plan_generation.sh $GEN $NUM_OFFSPRING $CROSSOVER_RATE $MUTATION_RATE
 ```
 
 Example output:
@@ -141,7 +141,7 @@ Task(crossover, "CAND_{p1} CAND_{p2} CAND_{child}")
 ```
 
 The crossover agent will:
-1. Run `./scripts/copy_candidate.sh {p1} {child}` to copy parent1
+1. Run `./ga/scripts/copy_candidate.sh {p1} {child}` to copy parent1
 2. Read both parents
 3. Edit child to incorporate elements from parent2
 4. Test correctness
@@ -156,7 +156,7 @@ Task(mutate, "CAND_{parent} CAND_{child}")
 ```
 
 The mutate agent will:
-1. Run `./scripts/copy_candidate.sh {parent} {child}` to copy parent
+1. Run `./ga/scripts/copy_candidate.sh {parent} {child}` to copy parent
 2. Read child file
 3. Make ONE small mutation
 4. Test correctness
@@ -167,18 +167,18 @@ The mutate agent will:
 
 For each id in `EVAL` line:
 ```
-Bash("./scripts/eval_candidate.sh {id}")
+Bash("./ga/scripts/eval_candidate.sh {id}")
 ```
 
 Then update scores:
 ```bash
-./scripts/update_score.sh {id} {cycles}
+./ga/scripts/update_score.sh {id} {cycles}
 ```
 
 #### 4e. Select Survivors
 
 ```bash
-./scripts/select_survivors.sh $POPULATION_SIZE
+./ga/scripts/select_survivors.sh $POPULATION_SIZE
 ```
 
 This keeps the top N candidates and **deletes** the rest, maintaining constant population size.
@@ -186,15 +186,15 @@ This keeps the top N candidates and **deletes** the rest, maintaining constant p
 #### 4f. Update Best & Log
 
 ```bash
-./scripts/get_stats.sh $BASELINE
-./scripts/save_best.sh $(./scripts/get_elite.sh 1)
+./ga/scripts/get_stats.sh $BASELINE
+./ga/scripts/save_best.sh $(./ga/scripts/get_elite.sh 1)
 ```
 
 Log generation summary and write `=== Generation N COMPLETE ===`
 
 ### 5. Finish
 
-- Best kernel is in `best/perf_takehome.py`
+- Best kernel is in `ga/best/perf_takehome.py`
 - Report: initial cycles vs final cycles, improvement percentage
 
 ## Critical Rules
