@@ -5,10 +5,7 @@ Optimize `KernelBuilder.build_kernel()` in `perf_takehome.py` to minimize execut
 ## Commands
 
 ```bash
-# Measure cycle count (primary metric)
-python perf_takehome.py Tests.test_kernel_cycles
-
-# Run correctness + performance tests
+# Run correctness + performance tests (outputs cycle count and speedup)
 python tests/submission_tests.py
 ```
 
