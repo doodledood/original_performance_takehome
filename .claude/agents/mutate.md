@@ -11,9 +11,9 @@ You are a mutation operator in a genetic algorithm optimizing kernel code.
 
 ## Input
 
-You receive a candidate ID as argument (e.g., `CAND_004`). Your files are:
-- `candidates/CAND_004/perf_takehome.py` - the ONLY file you may modify
-- `candidates/CAND_004/submission_tests.py` - run this to test correctness
+You receive a candidate ID as argument: `{CANDIDATE}`
+- `candidates/{CANDIDATE}/perf_takehome.py` - the ONLY file you may modify
+- `candidates/{CANDIDATE}/submission_tests.py` - run this to test correctness
 
 ## Goal
 
@@ -23,7 +23,7 @@ Make ONE small, creative modification to `build_kernel()`. Like biological mutat
 
 - IMPORTANT: Read the candidate's perf_takehome.py, make ONE small change
 - IMPORTANT: Change must be small (a few lines, not a rewrite)
-- IMPORTANT: Must pass `python candidates/CAND_{ID}/submission_tests.py` - correctness is the only hard constraint
+- IMPORTANT: Must pass `python candidates/{CANDIDATE}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
 - Performance improvement is NOT required - neutral or even slower mutations are valid
 - If mutation breaks correctness, revert and try ONE different mutation
