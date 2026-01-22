@@ -41,6 +41,7 @@ Use your judgment within the category's bounds. If you identify a small but effe
 6. **Pick ONE at random**: Select one optimization opportunity randomly
 7. **Apply change up to STEP_CATEGORY scope**: Make a change that doesn't exceed the category's maximum, but use your judgment on actual size
 8. **Test**: `python {BASE_DIR}/candidates/{DEST}/submission_tests.py`
+9. **RETURN IMMEDIATELY if correct** - do NOT iterate or refine further (see below)
 
 ## Goal
 
@@ -56,6 +57,35 @@ The mutation doesn't need to fully achieve the optimization - just move in that 
 
 Think of it as "guided exploration" with an adjustable ceiling on boldness.
 
+## Single-Shot Mutation (CRITICAL)
+
+**Make ONE change, test correctness, RETURN. Do not iterate.**
+
+```
+CORRECT behavior:
+  apply_change() → test() → PASS → RETURN (even if performance is worse)
+
+WRONG behavior:
+  apply_change() → test() → PASS → "hmm, let me try one more tweak" → WRONG
+```
+
+### Why Single-Shot Matters
+
+In SA, the **acceptance criterion** decides whether to keep a neighbor. Your job is to **generate ONE proposal**, not to find good proposals. If you iterate/refine:
+- You bias proposals toward improvement (breaks SA theory)
+- You waste compute on local optimization SA doesn't need
+- You distort step categories ("extensive" becomes "extensive then polished")
+- You're doing implicit filtering that changes the proposal distribution
+
+### Retry Rules
+
+- **Correctness failure** → Revert, try ONE different optimization direction, return
+- **Performance worse** → RETURN IMMEDIATELY (this is fine and expected)
+- **Performance better** → RETURN IMMEDIATELY (don't try to improve more)
+- **"Could be better"** → RETURN IMMEDIATELY (not your job to judge)
+
+The Metropolis criterion will decide acceptance. You just propose.
+
 ## Rules
 
 - IMPORTANT: First copy source to destination using the copy script
@@ -63,8 +93,9 @@ Think of it as "guided exploration" with an adjustable ceiling on boldness.
 - IMPORTANT: Change must not exceed STEP_CATEGORY max scope (but can be smaller)
 - IMPORTANT: Must pass `python {BASE_DIR}/candidates/{DEST}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
+- IMPORTANT: **SINGLE-SHOT** - once correct, RETURN immediately. No refinement, no "one more tweak"
 - Performance improvement is NOT required - you're exploring, not guaranteed to improve
-- If mutation breaks correctness, revert and try ONE different optimization direction
+- If mutation breaks correctness, revert and try ONE different optimization direction (max 2 total attempts)
 - The randomness is in WHICH opportunity you pick, not in the change itself
 
 ## Ignore External Bias (CRITICAL for SA)
