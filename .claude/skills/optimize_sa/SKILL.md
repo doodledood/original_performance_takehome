@@ -83,14 +83,14 @@ If the orchestrator biases the mutate agent toward improvement:
 
 **ONLY these parameters:**
 ```
-Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR $STEP_CATEGORY")
+Task(mutate, "sa CURRENT NEIGHBOR $STEP_CATEGORY")
 ```
 
 | Parameter | Source | Purpose |
 |-----------|--------|---------|
 | Base dir | "sa" | Directory context |
-| Source | "CAND_CURRENT" | Which candidate to mutate |
-| Dest | "CAND_NEIGHBOR" | Where to write result |
+| Source | "CURRENT" | Which candidate to mutate (agent adds CAND_ prefix) |
+| Dest | "NEIGHBOR" | Where to write result (agent adds CAND_ prefix) |
 | Step category | calc_step_size.sh output | Mutation magnitude ceiling |
 
 ### What NOT to Pass
@@ -109,18 +109,18 @@ Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR $STEP_CATEGORY")
 
 **WRONG** (biased):
 ```
-Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR moderate - we're at 45000 cycles!
+Task(mutate, "sa CURRENT NEIGHBOR moderate - we're at 45000 cycles!
 Try to push lower, maybe with loop unrolling or memory coalescing.")
 ```
 
 **WRONG** (score leakage):
 ```
-Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR extensive - current: 52000, best: 48000")
+Task(mutate, "sa CURRENT NEIGHBOR extensive - current: 52000, best: 48000")
 ```
 
 **CORRECT** (neutral):
 ```
-Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR extensive")
+Task(mutate, "sa CURRENT NEIGHBOR extensive")
 ```
 
 The mutate agent will read the code, identify opportunities from the code itself, pick one randomly, and apply it. No external bias needed or wanted.
@@ -236,7 +236,7 @@ STEP_CATEGORY=$(./sa/scripts/calc_step_size.sh $TEMPERATURE $INITIAL_TEMP $FINAL
 
 Then launch the mutate agent with step category:
 ```
-Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR $STEP_CATEGORY")
+Task(mutate, "sa CURRENT NEIGHBOR $STEP_CATEGORY")
 ```
 
 The mutate agent will:
@@ -309,8 +309,8 @@ Log: `[COOL] Temperature: {old} → {new}`
 1. **ONE MUTATION AT A TIME**: SA is sequential - process one neighbor per iteration
 2. **CLEANUP BEFORE PERTURB**: Always run cleanup_neighbor.sh before creating a new neighbor
 3. **NEUTRAL PROMPTS ONLY**: Pass ONLY the 4 specified parameters to mutate agent - NO scores, NO strategy hints, NO "try to improve". See "Neutral Proposal Generation" section.
-4. **AGENT ARGS**: Pass base directory, candidate IDs, and step category
-   - mutate: `sa CAND_CURRENT CAND_NEIGHBOR $STEP_CATEGORY`
+4. **AGENT ARGS**: Pass base directory, candidate IDs (without CAND_ prefix), and step category
+   - mutate: `sa CURRENT NEIGHBOR $STEP_CATEGORY`
    - Calculate STEP_CATEGORY using: `./sa/scripts/calc_step_size.sh $TEMPERATURE $INITIAL_TEMP $FINAL_TEMP`
 5. **STATE PERSISTENCE**: Update state.txt after each iteration for resumption
 6. **METROPOLIS CRITERION**: Use accept_solution.sh for all acceptance decisions
