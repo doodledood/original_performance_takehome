@@ -41,15 +41,15 @@ The mutation step size scales proportionally with temperature using textual cate
 - High temperature → larger mutations (exploration, escape local minima)
 - Low temperature → smaller mutations (exploitation, fine-tuning)
 
-Temperature is mapped to a 1-10 scale, then converted to a category:
+Uses **logarithmic mapping** to match exponential cooling. With defaults (500 iterations):
 
-| Temperature Phase | Scale | Category | Max Scope |
-|-------------------|-------|----------|-----------|
-| Near initial (hot) | 9-10 | extensive | Major changes allowed |
-| Mid-high | 7-8 | substantial | Restructuring allowed |
-| Mid (balanced) | 5-6 | moderate | Focused optimizations |
-| Mid-low | 3-4 | small | Local changes only |
-| Near final (cold) | 1-2 | minimal | Single tweaks only |
+| Category | Iterations | % of run | Max Scope |
+|----------|------------|----------|-----------|
+| extensive | ~105 | 21% | Major changes allowed |
+| substantial | ~65 | 13% | Restructuring allowed |
+| moderate | ~135 | 27% | Focused optimizations |
+| small | ~135 | 27% | Local changes only |
+| minimal | ~60 | 12% | Single tweaks only |
 
 The category sets a ceiling - the agent may make smaller changes if appropriate.
 
