@@ -98,8 +98,8 @@ class KernelBuilder:
         self, forest_height: int, n_nodes: int, batch_size: int, rounds: int
     ):
         """
-        20-way parallelism with symmetric 10+10 split:
-        Higher parallelism to better utilize available ALU slots.
+        Triple-wave pipelining with 8+7+7 split:
+        Three-way interleaving for better latency hiding.
         """
         tmp1 = self.alloc_scratch("tmp1")
         tmp2 = self.alloc_scratch("tmp2")
@@ -147,11 +147,12 @@ class KernelBuilder:
         self.add("valu", ("vbroadcast", n_nodes_vec, self.scratch["n_nodes"]))
 
         self.add("flow", ("pause",))
-        self.add("debug", ("comment", "20-way parallelism with symmetric 10+10 split"))
+        self.add("debug", ("comment", "Triple-wave pipelining with 8+7+7 split"))
 
         num_vector_chunks = batch_size // VLEN
         NUM_PARALLEL = 22
-        WAVE1_SIZE = 11
+        WAVE1_SIZE = 8
+        WAVE2_SIZE = 7
 
         chunk_regs = []
         for c in range(NUM_PARALLEL):
@@ -177,7 +178,8 @@ class KernelBuilder:
                     active_chunks.append((i, chunk_num))
 
             wave1 = active_chunks[:WAVE1_SIZE]
-            wave2 = active_chunks[WAVE1_SIZE:]
+            wave2 = active_chunks[WAVE1_SIZE:WAVE1_SIZE+WAVE2_SIZE]
+            wave3 = active_chunks[WAVE1_SIZE+WAVE2_SIZE:]
 
             base_consts = {}
             for c_idx, chunk_num in active_chunks:
@@ -210,10 +212,7 @@ class KernelBuilder:
                 self.instrs.append({"load": load_ops})
 
             for round_num in range(rounds):
-                is_first_round = (round_num == 0)
-                is_last_round = (round_num == rounds - 1)
-
-                if not wave2:
+                if not wave2 and not wave3:
                     all_alu_ops = []
                     for c_idx, _ in active_chunks:
                         r = chunk_regs[c_idx]
@@ -291,6 +290,22 @@ class KernelBuilder:
                             bundle["load"] = load_batch
                         self.instrs.append(bundle)
 
+                    wave3_alu_ops = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        for i in range(VLEN):
+                            wave3_alu_ops.append(("+", r['node_addrs'][i], self.scratch["forest_values_p"], r['vec_idx'] + i))
+
+                    while wave3_alu_ops:
+                        bundle = {}
+                        alu_batch, wave3_alu_ops = wave3_alu_ops[:12], wave3_alu_ops[12:]
+                        bundle["alu"] = alu_batch
+                        if wave1_load_idx < len(wave1_loads):
+                            load_batch = wave1_loads[wave1_load_idx:wave1_load_idx+2]
+                            wave1_load_idx += 2
+                            bundle["load"] = load_batch
+                        self.instrs.append(bundle)
+
                     while wave1_load_idx < len(wave1_loads):
                         load_batch = wave1_loads[wave1_load_idx:wave1_load_idx+2]
                         wave1_load_idx += 2
@@ -316,6 +331,12 @@ class KernelBuilder:
                             wave2_load_idx += 2
                             bundle["load"] = load_batch
                         self.instrs.append(bundle)
+
+                    wave3_loads = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        for i in range(VLEN):
+                            wave3_loads.append(("load", r['vec_node_val'] + i, r['node_addrs'][i]))
 
                     for hi, (op1, val1, op2, op3, val3) in enumerate(HASH_STAGES):
                         fused_ops = []
@@ -352,7 +373,9 @@ class KernelBuilder:
                         wave2_load_idx += 2
                         self.instrs.append({"load": load_batch})
 
-                if wave2:
+                    wave3_load_idx = 0
+
+                if wave2 or wave3:
                     w1_post = []
                     for c_idx, _ in wave1:
                         r = chunk_regs[c_idx]
@@ -362,9 +385,15 @@ class KernelBuilder:
                         r = chunk_regs[c_idx]
                         w2_xor.append(("^", r['vec_val'], r['vec_val'], r['vec_node_val']))
                     combined = w1_post + w2_xor
+                    wave3_load_idx = 0
                     while combined:
                         batch, combined = combined[:6], combined[6:]
-                        self.instrs.append({"valu": batch})
+                        bundle = {"valu": batch}
+                        if wave3_load_idx < len(wave3_loads):
+                            load_batch = wave3_loads[wave3_load_idx:wave3_load_idx+2]
+                            wave3_load_idx += 2
+                            bundle["load"] = load_batch
+                        self.instrs.append(bundle)
 
                     w1_post = []
                     for c_idx, _ in wave1:
@@ -379,7 +408,12 @@ class KernelBuilder:
                     combined = w1_post + w2_hash
                     while combined:
                         batch, combined = combined[:6], combined[6:]
-                        self.instrs.append({"valu": batch})
+                        bundle = {"valu": batch}
+                        if wave3_load_idx < len(wave3_loads):
+                            load_batch = wave3_loads[wave3_load_idx:wave3_load_idx+2]
+                            wave3_load_idx += 2
+                            bundle["load"] = load_batch
+                        self.instrs.append(bundle)
 
                     w1_post = []
                     for c_idx, _ in wave1:
@@ -392,7 +426,17 @@ class KernelBuilder:
                     combined = w1_post + w2_hash
                     while combined:
                         batch, combined = combined[:6], combined[6:]
-                        self.instrs.append({"valu": batch})
+                        bundle = {"valu": batch}
+                        if wave3_load_idx < len(wave3_loads):
+                            load_batch = wave3_loads[wave3_load_idx:wave3_load_idx+2]
+                            wave3_load_idx += 2
+                            bundle["load"] = load_batch
+                        self.instrs.append(bundle)
+
+                    while wave3_load_idx < len(wave3_loads):
+                        load_batch = wave3_loads[wave3_load_idx:wave3_load_idx+2]
+                        wave3_load_idx += 2
+                        self.instrs.append({"load": load_batch})
 
                     w1_compare = []
                     for c_idx, _ in wave1:
@@ -404,6 +448,11 @@ class KernelBuilder:
                         r = chunk_regs[c_idx]
                         w1_stores.append(("vstore", r['addr_val'], r['vec_val']))
 
+                    w3_xor = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        w3_xor.append(("^", r['vec_val'], r['vec_val'], r['vec_node_val']))
+
                     w1_store_idx = 0
                     for hi in range(1, len(HASH_STAGES)):
                         op1, val1, op2, op3, val3 = HASH_STAGES[hi]
@@ -414,7 +463,8 @@ class KernelBuilder:
                             fused_ops.append((op3, r['vec_tmp2'], r['vec_val'], const_vecs[val3]))
 
                         if hi == 1:
-                            fused_ops = w1_compare + fused_ops
+                            fused_ops = w1_compare + w3_xor + fused_ops
+                            w3_xor = []
                         while fused_ops:
                             batch, fused_ops = fused_ops[:6], fused_ops[6:]
                             bundle = {"valu": batch}
@@ -454,8 +504,15 @@ class KernelBuilder:
                     for c_idx, _ in wave2:
                         r = chunk_regs[c_idx]
                         w2_post.append(("&", r['vec_tmp1'], r['vec_val'], one_vec))
-                    while w2_post:
-                        batch, w2_post = w2_post[:6], w2_post[6:]
+                    op1_w3, val1_w3, op2_w3, op3_w3, val3_w3 = HASH_STAGES[0]
+                    w3_hash = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        w3_hash.append((op1_w3, r['vec_tmp1'], r['vec_val'], const_vecs[val1_w3]))
+                        w3_hash.append((op3_w3, r['vec_tmp2'], r['vec_val'], const_vecs[val3_w3]))
+                    combined = w2_post + w3_hash
+                    while combined:
+                        batch, combined = combined[:6], combined[6:]
                         bundle = {"valu": batch}
                         if w2_val_stores:
                             bundle["store"] = w2_val_stores[:2]
@@ -466,8 +523,13 @@ class KernelBuilder:
                     for c_idx, _ in wave2:
                         r = chunk_regs[c_idx]
                         w2_post.append(("+", r['vec_tmp2'], r['vec_tmp1'], one_vec))
-                    while w2_post:
-                        batch, w2_post = w2_post[:6], w2_post[6:]
+                    w3_hash = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        w3_hash.append((op2_w3, r['vec_val'], r['vec_tmp1'], r['vec_tmp2']))
+                    combined = w2_post + w3_hash
+                    while combined:
+                        batch, combined = combined[:6], combined[6:]
                         bundle = {"valu": batch}
                         if w2_val_stores:
                             bundle["store"] = w2_val_stores[:2]
@@ -478,30 +540,15 @@ class KernelBuilder:
                     for c_idx, _ in wave2:
                         r = chunk_regs[c_idx]
                         combined_post.append(("multiply_add", r['vec_idx'], r['vec_idx'], two_vec, r['vec_tmp2']))
-                    while combined_post:
-                        batch, combined_post = combined_post[:6], combined_post[6:]
-                        bundle = {"valu": batch}
-                        if w2_val_stores:
-                            bundle["store"] = w2_val_stores[:2]
-                            w2_val_stores = w2_val_stores[2:]
-                        self.instrs.append(bundle)
-
-                    combined_post = []
-                    for c_idx, _ in wave2:
-                        r = chunk_regs[c_idx]
-                        combined_post.append(("<", r['vec_cond'], r['vec_idx'], n_nodes_vec))
-                    while combined_post:
-                        batch, combined_post = combined_post[:6], combined_post[6:]
-                        bundle = {"valu": batch}
-                        if w2_val_stores:
-                            bundle["store"] = w2_val_stores[:2]
-                            w2_val_stores = w2_val_stores[2:]
-                        self.instrs.append(bundle)
-
-                    combined_post = []
-                    for c_idx, _ in wave2:
-                        r = chunk_regs[c_idx]
-                        combined_post.append(("*", r['vec_idx'], r['vec_idx'], r['vec_cond']))
+                    for hi in range(1, len(HASH_STAGES)):
+                        op1_w3, val1_w3, op2_w3, op3_w3, val3_w3 = HASH_STAGES[hi]
+                        for c_idx, _ in wave3:
+                            r = chunk_regs[c_idx]
+                            combined_post.append((op1_w3, r['vec_tmp1'], r['vec_val'], const_vecs[val1_w3]))
+                            combined_post.append((op3_w3, r['vec_tmp2'], r['vec_val'], const_vecs[val3_w3]))
+                        for c_idx, _ in wave3:
+                            r = chunk_regs[c_idx]
+                            combined_post.append((op2_w3, r['vec_val'], r['vec_tmp1'], r['vec_tmp2']))
                     while combined_post:
                         batch, combined_post = combined_post[:6], combined_post[6:]
                         bundle = {"valu": batch}
@@ -513,6 +560,91 @@ class KernelBuilder:
                     while w2_val_stores:
                         self.instrs.append({"store": w2_val_stores[:2]})
                         w2_val_stores = w2_val_stores[2:]
+
+                    combined_post = []
+                    for c_idx, _ in wave2:
+                        r = chunk_regs[c_idx]
+                        combined_post.append(("<", r['vec_cond'], r['vec_idx'], n_nodes_vec))
+                    while combined_post:
+                        batch, combined_post = combined_post[:6], combined_post[6:]
+                        self.instrs.append({"valu": batch})
+
+                    combined_post = []
+                    for c_idx, _ in wave2:
+                        r = chunk_regs[c_idx]
+                        combined_post.append(("*", r['vec_idx'], r['vec_idx'], r['vec_cond']))
+                    while combined_post:
+                        batch, combined_post = combined_post[:6], combined_post[6:]
+                        self.instrs.append({"valu": batch})
+
+                    w3_val_stores = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        w3_val_stores.append(("vstore", r['addr_val'], r['vec_val']))
+
+                    w3_post = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        w3_post.append(("&", r['vec_tmp1'], r['vec_val'], one_vec))
+                    while w3_post:
+                        batch, w3_post = w3_post[:6], w3_post[6:]
+                        bundle = {"valu": batch}
+                        if w3_val_stores:
+                            bundle["store"] = w3_val_stores[:2]
+                            w3_val_stores = w3_val_stores[2:]
+                        self.instrs.append(bundle)
+
+                    w3_post = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        w3_post.append(("+", r['vec_tmp2'], r['vec_tmp1'], one_vec))
+                    while w3_post:
+                        batch, w3_post = w3_post[:6], w3_post[6:]
+                        bundle = {"valu": batch}
+                        if w3_val_stores:
+                            bundle["store"] = w3_val_stores[:2]
+                            w3_val_stores = w3_val_stores[2:]
+                        self.instrs.append(bundle)
+
+                    combined_post = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        combined_post.append(("multiply_add", r['vec_idx'], r['vec_idx'], two_vec, r['vec_tmp2']))
+                    while combined_post:
+                        batch, combined_post = combined_post[:6], combined_post[6:]
+                        bundle = {"valu": batch}
+                        if w3_val_stores:
+                            bundle["store"] = w3_val_stores[:2]
+                            w3_val_stores = w3_val_stores[2:]
+                        self.instrs.append(bundle)
+
+                    combined_post = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        combined_post.append(("<", r['vec_cond'], r['vec_idx'], n_nodes_vec))
+                    while combined_post:
+                        batch, combined_post = combined_post[:6], combined_post[6:]
+                        bundle = {"valu": batch}
+                        if w3_val_stores:
+                            bundle["store"] = w3_val_stores[:2]
+                            w3_val_stores = w3_val_stores[2:]
+                        self.instrs.append(bundle)
+
+                    combined_post = []
+                    for c_idx, _ in wave3:
+                        r = chunk_regs[c_idx]
+                        combined_post.append(("*", r['vec_idx'], r['vec_idx'], r['vec_cond']))
+                    while combined_post:
+                        batch, combined_post = combined_post[:6], combined_post[6:]
+                        bundle = {"valu": batch}
+                        if w3_val_stores:
+                            bundle["store"] = w3_val_stores[:2]
+                            w3_val_stores = w3_val_stores[2:]
+                        self.instrs.append(bundle)
+
+                    while w3_val_stores:
+                        self.instrs.append({"store": w3_val_stores[:2]})
+                        w3_val_stores = w3_val_stores[2:]
 
                 else:
                     combined_post = []
