@@ -29,18 +29,28 @@ The step category specifies the **maximum** scope of the mutation. You may make 
 | substantial | Restructure | Reorganize a section, combine related changes |
 | extensive | Major change | Try a substantially different approach or strategy |
 
+**CRITICAL for extensive/substantial**: These levels require changes to code STRUCTURE, not just parameter values. Changing `NUM_PARALLEL = 18` to `NUM_PARALLEL = 20` is a "minimal" change regardless of step category. For extensive, think: different loop structures, different memory access patterns, different instruction sequences, different algorithmic approaches.
+
 Use your judgment within the category's bounds. If you identify a small but effective optimization while in "extensive" mode, that's fine - the category is a ceiling, not a requirement.
 
 ## Workflow
 
 1. **Parse step category**: If 4th argument provided, use it; otherwise default to "moderate"
 2. **Copy parent to destination**: Run `./scripts/copy_candidate.sh {BASE_DIR} {SOURCE} {DEST}`
-3. **Read the destination file**: `{BASE_DIR}/candidates/{DEST}/perf_takehome.py`
+3. **Read the destination file**: `{BASE_DIR}/candidates/CAND_{DEST}/perf_takehome.py`
 4. **Read problem.py** in the root to understand the machine architecture
-5. **Identify optimization opportunities**: Analyze the code and list 3-5 potential optimizations (e.g., loop unrolling, register reuse, instruction reordering, memory access patterns, reducing dependencies)
-6. **Pick ONE at random**: Select one optimization opportunity randomly
+5. **Identify optimization opportunities across DIFFERENT categories**: List 3-5 opportunities from DIFFERENT categories below:
+   - **Memory access**: Coalescing, prefetching, scratch usage, cache patterns
+   - **Loop structure**: Unrolling, tiling, fusion, fission, reordering
+   - **Instruction scheduling**: Reordering ops, reducing dependencies, hiding latency
+   - **Parallelism config**: Wave sizes, chunk distribution, core utilization
+   - **Register usage**: Reducing pressure, reusing values, spilling strategy
+   - **Algorithmic**: Different computation order, mathematical identities, approximations
+
+   **Each opportunity MUST be from a different category.** Do NOT list multiple variations of the same thing (e.g., "try 16 parallel" and "try 20 parallel" are the SAME category).
+6. **Pick ONE at random**: Use a random method (e.g., roll a die, pick by current timestamp digit) to select
 7. **Apply change up to STEP_CATEGORY scope**: Make a change that doesn't exceed the category's maximum, but use your judgment on actual size
-8. **Test**: `python {BASE_DIR}/candidates/{DEST}/submission_tests.py`
+8. **Test**: `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py`
 9. **RETURN IMMEDIATELY if correct** - do NOT iterate or refine further (see below)
 
 ## Goal
@@ -93,12 +103,19 @@ Pick ANY direction that has a remote chance of improving performance. Be open - 
 
 The algorithm will decide acceptance. You just propose.
 
+## Anti-patterns (DO NOT DO THESE)
+
+- **Parameter oscillation**: Changing `NUM_PARALLEL = 18` to `20` then back to `18` is useless exploration
+- **Same-category listing**: Listing "try 16 parallel", "try 18 parallel", "try 20 parallel" as different opportunities
+- **Constant-only changes at extensive level**: If step category is "extensive" but you only change a numeric constant, you're doing it wrong
+- **Ignoring code structure**: The biggest gains come from HOW the code is organized, not from tuning magic numbers
+
 ## Rules
 
 - IMPORTANT: First copy source to destination using the copy script
 - IMPORTANT: Only modify the DESTINATION file, never the source
 - IMPORTANT: Change must not exceed STEP_CATEGORY max scope (but can be smaller)
-- IMPORTANT: Must pass `python {BASE_DIR}/candidates/{DEST}/submission_tests.py` - correctness is the only hard constraint
+- IMPORTANT: Must pass `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
 - IMPORTANT: **SINGLE-SHOT** - once correct, RETURN immediately. No refinement, no "one more tweak"
 - Performance improvement is NOT required - you're exploring, not guaranteed to improve

@@ -98,8 +98,8 @@ class KernelBuilder:
         self, forest_height: int, n_nodes: int, batch_size: int, rounds: int
     ):
         """
-        18-way parallelism with 9+9 balanced split for higher throughput:
-        More chunks per group amortizes setup overhead over more data.
+        20-way parallelism with symmetric 10+10 split:
+        Higher parallelism to better utilize available ALU slots.
         """
         tmp1 = self.alloc_scratch("tmp1")
         tmp2 = self.alloc_scratch("tmp2")
@@ -147,11 +147,11 @@ class KernelBuilder:
         self.add("valu", ("vbroadcast", n_nodes_vec, self.scratch["n_nodes"]))
 
         self.add("flow", ("pause",))
-        self.add("debug", ("comment", "18-way parallelism with 9+9 balanced split"))
+        self.add("debug", ("comment", "20-way parallelism with symmetric 10+10 split"))
 
         num_vector_chunks = batch_size // VLEN
-        NUM_PARALLEL = 18
-        WAVE1_SIZE = 9
+        NUM_PARALLEL = 22
+        WAVE1_SIZE = 11
 
         chunk_regs = []
         for c in range(NUM_PARALLEL):
