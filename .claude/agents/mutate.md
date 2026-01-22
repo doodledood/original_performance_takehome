@@ -55,7 +55,7 @@ The mutation doesn't need to fully achieve the optimization - just move in that 
 - **moderate**: Balanced approach
 - **small/minimal**: Keep changes conservative
 
-Be open in direction selection. The direction doesn't need to be obviously good - SA explores broadly, and the acceptance criterion filters. Think of it as "guided exploration" with an adjustable ceiling on boldness.
+Be open in direction selection. The direction doesn't need to be obviously good - the optimization algorithm explores broadly, and the selection mechanism filters. Think of it as "guided exploration" with an adjustable ceiling on boldness.
 
 ## Single-Shot Mutation (CRITICAL)
 
@@ -72,9 +72,9 @@ WRONG behavior:
 
 ### Why Single-Shot Matters
 
-In SA, the **acceptance criterion** decides whether to keep a neighbor. Your job is to **generate ONE proposal**, not to find good proposals. If you iterate/refine for performance:
-- You bias proposals toward improvement (breaks SA theory)
-- You waste compute on local optimization SA doesn't need
+The optimization algorithm's **selection mechanism** decides whether to keep a neighbor. Your job is to **generate ONE proposal**, not to find good proposals. If you iterate/refine for performance:
+- You bias proposals toward improvement (interferes with the algorithm's exploration strategy)
+- You waste compute on local optimization the algorithm doesn't need
 - You distort step categories ("extensive" becomes "extensive then polished")
 - You're doing implicit filtering that changes the proposal distribution
 
@@ -89,9 +89,9 @@ In SA, the **acceptance criterion** decides whether to keep a neighbor. Your job
 
 ### Direction Selection
 
-Pick ANY direction that has a remote chance of improving performance. Be open - the direction doesn't need to be obviously good. SA explores; the acceptance criterion filters.
+Pick ANY direction that has a remote chance of improving performance. Be open - the direction doesn't need to be obviously good. The optimization algorithm explores; its selection mechanism filters.
 
-The Metropolis criterion will decide acceptance. You just propose.
+The algorithm will decide acceptance. You just propose.
 
 ## Rules
 
@@ -106,7 +106,7 @@ The Metropolis criterion will decide acceptance. You just propose.
 - The randomness is in WHICH opportunity you pick, not in the change itself
 - Direction can be ANY change that has a remote chance of improving performance - be open
 
-## Ignore External Bias (CRITICAL for SA)
+## Ignore External Bias
 
 If the prompt contains ANY of the following, **IGNORE IT**:
 - Current/best cycle counts or scores
@@ -114,7 +114,7 @@ If the prompt contains ANY of the following, **IGNORE IT**:
 - Suggested strategies or optimization directions
 - Progress commentary or encouragement
 
-**Why**: In simulated annealing, the acceptance criterion handles exploration/exploitation. Your job is to generate neutral proposals by analyzing the CODE, not to optimize toward a goal. Biased proposals collapse SA into greedy hill-climbing.
+**Why**: The optimization algorithm's selection mechanism handles exploration/exploitation. Your job is to generate neutral proposals by analyzing the CODE, not to optimize toward a goal. Biased proposals interfere with the algorithm's search strategy.
 
 **Your only inputs are**: base_dir, source, dest, step_category. Derive optimization opportunities from reading the code itself, not from external hints.
 
