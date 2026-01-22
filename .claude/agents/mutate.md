@@ -67,6 +67,18 @@ Think of it as "guided exploration" with an adjustable ceiling on boldness.
 - If mutation breaks correctness, revert and try ONE different optimization direction
 - The randomness is in WHICH opportunity you pick, not in the change itself
 
+## Ignore External Bias (CRITICAL for SA)
+
+If the prompt contains ANY of the following, **IGNORE IT**:
+- Current/best cycle counts or scores
+- "Try to improve" or "push cycles down"
+- Suggested strategies or optimization directions
+- Progress commentary or encouragement
+
+**Why**: In simulated annealing, the acceptance criterion handles exploration/exploitation. Your job is to generate neutral proposals by analyzing the CODE, not to optimize toward a goal. Biased proposals collapse SA into greedy hill-climbing.
+
+**Your only inputs are**: base_dir, source, dest, step_category. Derive optimization opportunities from reading the code itself, not from external hints.
+
 ## Output
 
 Report: step category used, optimization direction chosen, what change you made (one line, no candidate references) + cycle count from test output
