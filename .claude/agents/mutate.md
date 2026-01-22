@@ -19,28 +19,43 @@ You receive three or four arguments: `{BASE_DIR} {SOURCE} {DEST} [{STEP_CATEGORY
 
 ### Step Categories
 
-The step category specifies the **maximum** scope of the mutation. You may make smaller changes if appropriate:
+The step category specifies the **required** scope of the mutation. Your change MUST match this level:
 
-| Category | Max Scope | Description |
-|----------|-----------|-------------|
-| minimal | Single tweak | Adjust one constant, swap instructions, tweak one register |
-| small | Local change | Minor reordering, small local optimization |
-| moderate | Focused optimization | One meaningful improvement to a section |
-| substantial | Restructure | Reorganize a section, combine related changes |
-| extensive | Major change | Try a substantially different approach or strategy |
+| Category | Required Scope | Description |
+|----------|----------------|-------------|
+| minimal | Single tweak | Adjust one constant, swap two instructions |
+| small | Local change | Minor reordering within a few lines |
+| moderate | Focused optimization | Change how one operation/loop works |
+| substantial | Section restructure | Reorganize a section, change data flow patterns |
+| extensive | Structural change | Different loop structure, different memory access strategy, change how parallelism is organized |
 
-Use your judgment within the category's bounds. If you identify a small but effective optimization while in "extensive" mode, that's fine - the category is a ceiling, not a requirement.
+**CRITICAL**: The step category is a REQUIREMENT, not a ceiling. Changing `NUM_PARALLEL = 18` to `20` is ALWAYS "minimal" - if asked for "extensive" and you only tweak constants, you've failed.
+
+**Examples**:
+- **minimal**: `NUM_PARALLEL = 18` → `20`
+- **small**: Swap order of two independent operations
+- **moderate**: Change how one loop iterates or accesses memory
+- **substantial**: Restructure how chunks are processed across waves
+- **extensive**: Change from 2-wave to 3-wave processing, or change memory access from strided to coalesced across a section
 
 ## Workflow
 
 1. **Parse step category**: If 4th argument provided, use it; otherwise default to "moderate"
 2. **Copy parent to destination**: Run `./scripts/copy_candidate.sh {BASE_DIR} {SOURCE} {DEST}`
-3. **Read the destination file**: `{BASE_DIR}/candidates/{DEST}/perf_takehome.py`
+3. **Read the destination file**: `{BASE_DIR}/candidates/CAND_{DEST}/perf_takehome.py`
 4. **Read problem.py** in the root to understand the machine architecture
-5. **Identify optimization opportunities**: Analyze the code and list 3-5 potential optimizations (e.g., loop unrolling, register reuse, instruction reordering, memory access patterns, reducing dependencies)
-6. **Pick ONE at random**: Select one optimization opportunity randomly
-7. **Apply change up to STEP_CATEGORY scope**: Make a change that doesn't exceed the category's maximum, but use your judgment on actual size
-8. **Test**: `python {BASE_DIR}/candidates/{DEST}/submission_tests.py`
+5. **Identify optimization opportunities across DIFFERENT categories**: List 3-5 opportunities from DIFFERENT categories below:
+   - **Memory access**: Coalescing, prefetching, scratch usage, cache patterns
+   - **Loop structure**: Unrolling, tiling, fusion, fission, reordering
+   - **Instruction scheduling**: Reordering ops, reducing dependencies, hiding latency
+   - **Parallelism config**: Wave sizes, chunk distribution, core utilization
+   - **Register usage**: Reducing pressure, reusing values, spilling strategy
+   - **Algorithmic**: Different computation order, mathematical identities, approximations
+
+   **Each opportunity MUST be from a different category.** Do NOT list multiple variations of the same thing (e.g., "try 16 parallel" and "try 20 parallel" are the SAME category).
+6. **Pick ONE at random**: Use a random method (e.g., roll a die, pick by current timestamp digit) to select
+7. **Apply change matching STEP_CATEGORY scope**: Make a change that matches the required category level
+8. **Test**: `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py`
 9. **RETURN IMMEDIATELY if correct** - do NOT iterate or refine further (see below)
 
 ## Goal
@@ -48,14 +63,15 @@ Use your judgment within the category's bounds. If you identify a small but effe
 Unlike biological mutation, you can be smarter. Instead of blind random changes:
 1. Analyze the code to identify what COULD be optimized
 2. Pick ONE direction at random - ANY direction with a remote chance of helping
-3. Commit to that direction and make it work, **up to the step category's max scope**
+3. Commit to that direction and make it work, **matching the step category's required scope**
 
-The mutation doesn't need to fully achieve the optimization - just move in that direction. The step category sets the upper bound on how bold you can be:
-- **extensive/substantial**: You CAN make big changes, but smaller is fine too
-- **moderate**: Balanced approach
-- **small/minimal**: Keep changes conservative
+The mutation should match the requested step category in scope:
+- **extensive**: Structural changes - different loop organization, different memory strategy
+- **substantial**: Reorganize a section's data flow or processing order
+- **moderate**: Change how one operation works
+- **small/minimal**: Conservative tweaks
 
-Be open in direction selection. The direction doesn't need to be obviously good - the optimization algorithm explores broadly, and the selection mechanism filters. Think of it as "guided exploration" with an adjustable ceiling on boldness.
+Be open in direction selection. The direction doesn't need to be obviously good - the optimization algorithm explores broadly, and the selection mechanism filters.
 
 ## Single-Shot Mutation (CRITICAL)
 
@@ -93,12 +109,19 @@ Pick ANY direction that has a remote chance of improving performance. Be open - 
 
 The algorithm will decide acceptance. You just propose.
 
+## Anti-patterns (DO NOT DO THESE)
+
+- **Under-delivering on step size**: If asked for "extensive", you MUST make extensive changes. Tweaking a constant is NOT extensive.
+- **Parameter oscillation**: Changing `NUM_PARALLEL = 18` to `20` is a "minimal" change, period. Don't pretend it's more.
+- **Same-category listing**: Listing "try 16 parallel", "try 18 parallel", "try 20 parallel" as different opportunities - these are all the same thing
+- **Ignoring code structure**: The biggest gains come from HOW the code is organized, not from tuning magic numbers
+
 ## Rules
 
 - IMPORTANT: First copy source to destination using the copy script
 - IMPORTANT: Only modify the DESTINATION file, never the source
-- IMPORTANT: Change must not exceed STEP_CATEGORY max scope (but can be smaller)
-- IMPORTANT: Must pass `python {BASE_DIR}/candidates/{DEST}/submission_tests.py` - correctness is the only hard constraint
+- IMPORTANT: Change MUST match STEP_CATEGORY scope - don't under-deliver (e.g., tweaking constants when asked for extensive)
+- IMPORTANT: Must pass `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
 - IMPORTANT: **SINGLE-SHOT** - once correct, RETURN immediately. No refinement, no "one more tweak"
 - Performance improvement is NOT required - you're exploring, not guaranteed to improve
