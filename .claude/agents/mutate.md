@@ -19,19 +19,24 @@ You receive three or four arguments: `{BASE_DIR} {SOURCE} {DEST} [{STEP_CATEGORY
 
 ### Step Categories
 
-The step category specifies the **maximum** scope of the mutation. You may make smaller changes if appropriate:
+The step category specifies the **required** scope of the mutation. Your change MUST match this level:
 
-| Category | Max Scope | Description |
-|----------|-----------|-------------|
+| Category | Required Scope | Description |
+|----------|----------------|-------------|
 | minimal | Single tweak | Adjust one constant, swap instructions, tweak one register |
 | small | Local change | Minor reordering, small local optimization |
 | moderate | Focused optimization | One meaningful improvement to a section |
 | substantial | Restructure | Reorganize a section, combine related changes |
-| extensive | Major change | Try a substantially different approach or strategy |
+| extensive | Major rewrite | Substantially different approach - rewrite a section or try a new strategy |
 
-**CRITICAL for extensive/substantial**: These levels require changes to code STRUCTURE, not just parameter values. Changing `NUM_PARALLEL = 18` to `NUM_PARALLEL = 20` is a "minimal" change regardless of step category. For extensive, think: different loop structures, different memory access patterns, different instruction sequences, different algorithmic approaches.
+**CRITICAL**: The step category is a REQUIREMENT, not a ceiling. If the category is "extensive", you MUST make extensive structural changes. Changing `NUM_PARALLEL = 18` to `NUM_PARALLEL = 20` is ALWAYS a "minimal" change - if you're asked for "extensive" and you only tweak constants, you've failed the task.
 
-Use your judgment within the category's bounds. If you identify a small but effective optimization while in "extensive" mode, that's fine - the category is a ceiling, not a requirement.
+**Examples by category**:
+- **minimal**: Change a constant, swap two instructions
+- **small**: Reorder a few operations, adjust a small loop
+- **moderate**: Optimize one function's memory access pattern
+- **substantial**: Restructure how a section processes data
+- **extensive**: Rewrite the core loop structure, try a completely different parallelization strategy, fundamentally change how data flows through the kernel
 
 ## Workflow
 
@@ -49,7 +54,7 @@ Use your judgment within the category's bounds. If you identify a small but effe
 
    **Each opportunity MUST be from a different category.** Do NOT list multiple variations of the same thing (e.g., "try 16 parallel" and "try 20 parallel" are the SAME category).
 6. **Pick ONE at random**: Use a random method (e.g., roll a die, pick by current timestamp digit) to select
-7. **Apply change up to STEP_CATEGORY scope**: Make a change that doesn't exceed the category's maximum, but use your judgment on actual size
+7. **Apply change matching STEP_CATEGORY scope**: Make a change that matches the required category level
 8. **Test**: `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py`
 9. **RETURN IMMEDIATELY if correct** - do NOT iterate or refine further (see below)
 
@@ -58,14 +63,15 @@ Use your judgment within the category's bounds. If you identify a small but effe
 Unlike biological mutation, you can be smarter. Instead of blind random changes:
 1. Analyze the code to identify what COULD be optimized
 2. Pick ONE direction at random - ANY direction with a remote chance of helping
-3. Commit to that direction and make it work, **up to the step category's max scope**
+3. Commit to that direction and make it work, **matching the step category's required scope**
 
-The mutation doesn't need to fully achieve the optimization - just move in that direction. The step category sets the upper bound on how bold you can be:
-- **extensive/substantial**: You CAN make big changes, but smaller is fine too
-- **moderate**: Balanced approach
-- **small/minimal**: Keep changes conservative
+The mutation should match the requested step category in scope:
+- **extensive**: MUST make major structural changes - rewrite loops, change algorithms, restructure data flow
+- **substantial**: MUST reorganize code sections, not just tweak parameters
+- **moderate**: Make a meaningful but focused change
+- **small/minimal**: Fine to make conservative tweaks
 
-Be open in direction selection. The direction doesn't need to be obviously good - the optimization algorithm explores broadly, and the selection mechanism filters. Think of it as "guided exploration" with an adjustable ceiling on boldness.
+Be open in direction selection. The direction doesn't need to be obviously good - the optimization algorithm explores broadly, and the selection mechanism filters.
 
 ## Single-Shot Mutation (CRITICAL)
 
@@ -105,16 +111,16 @@ The algorithm will decide acceptance. You just propose.
 
 ## Anti-patterns (DO NOT DO THESE)
 
-- **Parameter oscillation**: Changing `NUM_PARALLEL = 18` to `20` then back to `18` is useless exploration
-- **Same-category listing**: Listing "try 16 parallel", "try 18 parallel", "try 20 parallel" as different opportunities
-- **Constant-only changes at extensive level**: If step category is "extensive" but you only change a numeric constant, you're doing it wrong
+- **Under-delivering on step size**: If asked for "extensive", you MUST make extensive changes. Tweaking a constant is NOT extensive.
+- **Parameter oscillation**: Changing `NUM_PARALLEL = 18` to `20` is a "minimal" change, period. Don't pretend it's more.
+- **Same-category listing**: Listing "try 16 parallel", "try 18 parallel", "try 20 parallel" as different opportunities - these are all the same thing
 - **Ignoring code structure**: The biggest gains come from HOW the code is organized, not from tuning magic numbers
 
 ## Rules
 
 - IMPORTANT: First copy source to destination using the copy script
 - IMPORTANT: Only modify the DESTINATION file, never the source
-- IMPORTANT: Change must not exceed STEP_CATEGORY max scope (but can be smaller)
+- IMPORTANT: Change MUST match STEP_CATEGORY scope - don't under-deliver (e.g., tweaking constants when asked for extensive)
 - IMPORTANT: Must pass `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
 - IMPORTANT: **SINGLE-SHOT** - once correct, RETURN immediately. No refinement, no "one more tweak"
