@@ -23,20 +23,20 @@ The step category specifies the **required** scope of the mutation. Your change 
 
 | Category | Required Scope | Description |
 |----------|----------------|-------------|
-| minimal | Single tweak | Adjust one constant, swap instructions, tweak one register |
-| small | Local change | Minor reordering, small local optimization |
-| moderate | Focused optimization | One meaningful improvement to a section |
-| substantial | Restructure | Reorganize a section, combine related changes |
-| extensive | Major rewrite | Substantially different approach - rewrite a section or try a new strategy |
+| minimal | Single tweak | Adjust one constant, swap two instructions |
+| small | Local change | Minor reordering within a few lines |
+| moderate | Focused optimization | Change how one operation/loop works |
+| substantial | Section restructure | Reorganize a section, change data flow patterns |
+| extensive | Structural change | Different loop structure, different memory access strategy, change how parallelism is organized |
 
-**CRITICAL**: The step category is a REQUIREMENT, not a ceiling. If the category is "extensive", you MUST make extensive structural changes. Changing `NUM_PARALLEL = 18` to `NUM_PARALLEL = 20` is ALWAYS a "minimal" change - if you're asked for "extensive" and you only tweak constants, you've failed the task.
+**CRITICAL**: The step category is a REQUIREMENT, not a ceiling. Changing `NUM_PARALLEL = 18` to `20` is ALWAYS "minimal" - if asked for "extensive" and you only tweak constants, you've failed.
 
-**Examples by category**:
-- **minimal**: Change a constant, swap two instructions
-- **small**: Reorder a few operations, adjust a small loop
-- **moderate**: Optimize one function's memory access pattern
-- **substantial**: Restructure how a section processes data
-- **extensive**: Rewrite the core loop structure, try a completely different parallelization strategy, fundamentally change how data flows through the kernel
+**Examples**:
+- **minimal**: `NUM_PARALLEL = 18` → `20`
+- **small**: Swap order of two independent operations
+- **moderate**: Change how one loop iterates or accesses memory
+- **substantial**: Restructure how chunks are processed across waves
+- **extensive**: Change from 2-wave to 3-wave processing, or change memory access from strided to coalesced across a section
 
 ## Workflow
 
@@ -66,10 +66,10 @@ Unlike biological mutation, you can be smarter. Instead of blind random changes:
 3. Commit to that direction and make it work, **matching the step category's required scope**
 
 The mutation should match the requested step category in scope:
-- **extensive**: MUST make major structural changes - rewrite loops, change algorithms, restructure data flow
-- **substantial**: MUST reorganize code sections, not just tweak parameters
-- **moderate**: Make a meaningful but focused change
-- **small/minimal**: Fine to make conservative tweaks
+- **extensive**: Structural changes - different loop organization, different memory strategy
+- **substantial**: Reorganize a section's data flow or processing order
+- **moderate**: Change how one operation works
+- **small/minimal**: Conservative tweaks
 
 Be open in direction selection. The direction doesn't need to be obviously good - the optimization algorithm explores broadly, and the selection mechanism filters.
 
