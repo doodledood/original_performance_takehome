@@ -43,13 +43,15 @@ The mutation step size scales proportionally with temperature using textual cate
 
 Temperature is mapped to a 1-10 scale, then converted to a category:
 
-| Temperature Phase | Scale | Category | Mutation Scope |
-|-------------------|-------|----------|----------------|
-| Near initial (hot) | 9-10 | extensive | 15+ lines, major changes |
-| Mid-high | 7-8 | substantial | 8-15 lines, restructure |
-| Mid (balanced) | 5-6 | moderate | 4-8 lines, focused optimization |
-| Mid-low | 3-4 | small | 2-4 lines, local changes |
-| Near final (cold) | 1-2 | minimal | 1-2 lines, fine-tuning |
+| Temperature Phase | Scale | Category | Max Scope |
+|-------------------|-------|----------|-----------|
+| Near initial (hot) | 9-10 | extensive | Major changes allowed |
+| Mid-high | 7-8 | substantial | Restructuring allowed |
+| Mid (balanced) | 5-6 | moderate | Focused optimizations |
+| Mid-low | 3-4 | small | Local changes only |
+| Near final (cold) | 1-2 | minimal | Single tweaks only |
+
+The category sets a ceiling - the agent may make smaller changes if appropriate.
 
 This follows SA best practice: `ΔE_typical ≈ c · T` (typical energy change proportional to temperature)
 

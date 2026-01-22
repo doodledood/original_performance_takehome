@@ -19,15 +19,17 @@ You receive three or four arguments: `{BASE_DIR} {SOURCE} {DEST} [{STEP_CATEGORY
 
 ### Step Categories
 
-The step category controls how aggressive the mutation is:
+The step category specifies the **maximum** scope of the mutation. You may make smaller changes if appropriate:
 
-| Category | Scope | Description |
-|----------|-------|-------------|
-| minimal | 1-2 lines | Single instruction tweak, adjust one constant or register |
-| small | 2-4 lines | Local change, minor reordering, small local optimization |
-| moderate | 4-8 lines | Focused optimization, one meaningful improvement |
-| substantial | 8-15 lines | Restructure a section, combine multiple small changes |
-| extensive | 15+ lines | Major approach change, try a substantially different strategy |
+| Category | Max Scope | Description |
+|----------|-----------|-------------|
+| minimal | Single tweak | Adjust one constant, swap instructions, tweak one register |
+| small | Local change | Minor reordering, small local optimization |
+| moderate | Focused optimization | One meaningful improvement to a section |
+| substantial | Restructure | Reorganize a section, combine related changes |
+| extensive | Major change | Try a substantially different approach or strategy |
+
+Use your judgment within the category's bounds. If you identify a small but effective optimization while in "extensive" mode, that's fine - the category is a ceiling, not a requirement.
 
 ## Workflow
 
@@ -37,12 +39,7 @@ The step category controls how aggressive the mutation is:
 4. **Read problem.py** in the root to understand the machine architecture
 5. **Identify optimization opportunities**: Analyze the code and list 3-5 potential optimizations (e.g., loop unrolling, register reuse, instruction reordering, memory access patterns, reducing dependencies)
 6. **Pick ONE at random**: Select one optimization opportunity randomly
-7. **Apply change scaled to STEP_CATEGORY**:
-   - minimal: Change 1-2 lines - tweak a constant, swap two instructions, adjust one register
-   - small: Change 2-4 lines - small local optimization, minor reordering
-   - moderate: Change 4-8 lines - implement one focused optimization
-   - substantial: Change 8-15 lines - restructure a section, combine optimizations
-   - extensive: Change 15+ lines - try a substantially different approach
+7. **Apply change up to STEP_CATEGORY scope**: Make a change that doesn't exceed the category's maximum, but use your judgment on actual size
 8. **Test**: `python {BASE_DIR}/candidates/{DEST}/submission_tests.py`
 
 ## Goal
@@ -50,24 +47,24 @@ The step category controls how aggressive the mutation is:
 Unlike biological mutation, you can be smarter. Instead of blind random changes:
 1. Analyze the code to identify what COULD be optimized
 2. Pick ONE optimization direction at random
-3. Make a step toward that optimization, **scaled to the step category**
+3. Make a step toward that optimization, **up to the step category's max scope**
 
-The mutation doesn't need to fully achieve the optimization - just move in that direction. The step category determines how far:
-- **extensive/substantial**: Bold exploration, try significant changes, risk breaking things
-- **moderate**: Balanced approach, moderate changes
-- **small/minimal**: Conservative refinement, small careful changes
+The mutation doesn't need to fully achieve the optimization - just move in that direction. The step category sets the upper bound on how bold you can be:
+- **extensive/substantial**: You CAN make big changes, but smaller is fine too
+- **moderate**: Balanced approach
+- **small/minimal**: Keep changes conservative
 
-Think of it as "guided exploration" with an adjustable "boldness dial".
+Think of it as "guided exploration" with an adjustable ceiling on boldness.
 
 ## Rules
 
 - IMPORTANT: First copy source to destination using the copy script
 - IMPORTANT: Only modify the DESTINATION file, never the source
-- IMPORTANT: Change size must match STEP_CATEGORY (see guide above)
+- IMPORTANT: Change must not exceed STEP_CATEGORY max scope (but can be smaller)
 - IMPORTANT: Must pass `python {BASE_DIR}/candidates/{DEST}/submission_tests.py` - correctness is the only hard constraint
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
 - Performance improvement is NOT required - you're exploring, not guaranteed to improve
-- If mutation breaks correctness, revert and try ONE different optimization direction (consider using smaller step category)
+- If mutation breaks correctness, revert and try ONE different optimization direction
 - The randomness is in WHICH opportunity you pick, not in the change itself
 
 ## Output

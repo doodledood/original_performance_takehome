@@ -6,12 +6,12 @@
 #   T = initial_temp → scale 10 → "extensive"
 #   T = final_temp   → scale 1  → "minimal"
 #
-# Categories (higher = bolder changes):
-#   1-2: minimal   - 1-2 lines, single instruction tweak
-#   3-4: small     - 2-4 lines, local change
-#   5-6: moderate  - 4-8 lines, focused optimization
-#   7-8: substantial - 8-15 lines, restructure section
-#   9-10: extensive - 15+ lines, major approach change
+# Categories (higher = bolder changes allowed):
+#   1-2: minimal     - single tweaks
+#   3-4: small       - local changes
+#   5-6: moderate    - focused optimizations
+#   7-8: substantial - restructuring
+#   9-10: extensive  - major approach changes
 
 set -euo pipefail
 
