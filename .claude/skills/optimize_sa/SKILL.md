@@ -35,6 +35,24 @@ Optimize `build_kernel()` using simulated annealing with the mutate agent.
 **Temperature Levels**: With defaults, `5000 * 0.95^n = 10` gives n ≈ 121 levels.
 Total iterations: 121 × 5 = 605 (capped by max_iterations=500)
 
+### Mutation Step Size
+
+The mutation step size (1-5) scales proportionally with temperature:
+- High temperature → larger mutations (exploration, escape local minima)
+- Low temperature → smaller mutations (exploitation, fine-tuning)
+
+Formula: `step_size = 1 + 4 * (T - T_final) / (T_initial - T_final)`
+
+| Temperature Phase | Step Size | Mutation Scope |
+|-------------------|-----------|----------------|
+| Near initial (hot) | 5 | 15+ lines, major changes |
+| Mid-high | 4 | 8-15 lines, restructure |
+| Mid (balanced) | 3 | 4-8 lines, focused optimization |
+| Mid-low | 2 | 2-4 lines, local changes |
+| Near final (cold) | 1 | 1-2 lines, fine-tuning |
+
+This follows SA best practice: `ΔE_typical ≈ c · T` (typical energy change proportional to temperature)
+
 ## Algorithm Overview
 
 Simulated annealing explores the solution space by:
@@ -76,6 +94,7 @@ All scripts are in `./sa/scripts/`:
 | `get_stats.sh [baseline]` | Get current state | CURRENT/BEST/TEMP/ITERATION |
 | `log_iteration.sh {iter} {temp} {cur} {best} {status}` | Log to history | "Logged iteration N" |
 | `cleanup_neighbor.sh` | Remove NEIGHBOR directory | "Cleaned up" |
+| `calc_step_size.sh {temp} {init} {final}` | Calculate mutation step size 1-5 | Step size integer |
 
 ### Wrapper Scripts (call shared utilities)
 
@@ -143,22 +162,25 @@ while TEMPERATURE > FINAL_TEMP and ITERATION < MAX_ITERATIONS:
 
 #### 3a. Generate Neighbor
 
-Create a perturbation of CURRENT:
+Create a perturbation of CURRENT with step size proportional to temperature:
 
 ```bash
 # Remove any existing neighbor first
 ./sa/scripts/cleanup_neighbor.sh
+
+# Calculate step size based on current temperature (scales mutation magnitude)
+STEP_SIZE=$(./sa/scripts/calc_step_size.sh $TEMPERATURE $INITIAL_TEMP $FINAL_TEMP)
 ```
 
-Then launch the mutate agent:
+Then launch the mutate agent with step size:
 ```
-Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR")
+Task(mutate, "sa CAND_CURRENT CAND_NEIGHBOR $STEP_SIZE")
 ```
 
 The mutate agent will:
 1. Run `./scripts/copy_candidate.sh sa CURRENT NEIGHBOR`
 2. Read CURRENT's code
-3. Make ONE small mutation
+3. Make a mutation scaled to STEP_SIZE (larger at high temp, smaller at low temp)
 4. Test correctness
 
 #### 3b. Evaluate Neighbor
@@ -224,10 +246,12 @@ Log: `[COOL] Temperature: {old} → {new}`
 
 1. **ONE MUTATION AT A TIME**: SA is sequential - process one neighbor per iteration
 2. **CLEANUP BEFORE PERTURB**: Always run cleanup_neighbor.sh before creating a new neighbor
-3. **AGENT ARGS**: Pass base directory and candidate IDs
-   - mutate: `sa CAND_CURRENT CAND_NEIGHBOR`
+3. **AGENT ARGS**: Pass base directory, candidate IDs, and step size
+   - mutate: `sa CAND_CURRENT CAND_NEIGHBOR $STEP_SIZE`
+   - Calculate STEP_SIZE using: `./sa/scripts/calc_step_size.sh $TEMPERATURE $INITIAL_TEMP $FINAL_TEMP`
 4. **STATE PERSISTENCE**: Update state.txt after each iteration for resumption
 5. **METROPOLIS CRITERION**: Use accept_solution.sh for all acceptance decisions
+6. **STEP SIZE SCALING**: Always calculate step size before mutation - this ensures larger exploration at high temp, fine-tuning at low temp
 
 ## State File Format
 
@@ -259,26 +283,33 @@ REJECTED_COUNT=15
 [START] Fresh SA run | initial_temp=1000, final_temp=1, cooling_rate=0.95
 [INIT] Baseline: 147734 cycles
 
-=== Temperature 1000.0 ===
+=== Temperature 1000.0 (step_size=5) ===
 [ITER 1] Perturbing CURRENT...
-[MUTATE] 1: optimized memory access pattern
+[MUTATE] step=5: optimized memory access pattern (major change)
 [EVAL] NEIGHBOR: 145000 cycles
 [ACCEPT] 145000 < 147734 (improvement)
 [BEST] New best: 145000
 
 [ITER 2] Perturbing CURRENT...
-[MUTATE] 2: unrolled inner loop
+[MUTATE] step=5: unrolled inner loop
 [EVAL] NEIGHBOR: 146500 cycles
 [REJECT] 146500 > 145000, p=0.22 < rand=0.67
 
 [ITER 3] Perturbing CURRENT...
-[MUTATE] 3: reduced register pressure
+[MUTATE] step=5: reduced register pressure
 [EVAL] NEIGHBOR: 146000 cycles
 [ACCEPT] 146000 > 145000, p=0.37 > rand=0.12 (Metropolis)
 
 [COOL] Temperature: 1000.0 → 950.0
 
-=== Temperature 950.0 ===
+=== Temperature 100.0 (step_size=2) ===
+[ITER 47] Perturbing CURRENT...
+[MUTATE] step=2: tweaked loop bounds (small local change)
+...
+
+=== Temperature 10.0 (step_size=1) ===
+[ITER 120] Perturbing CURRENT...
+[MUTATE] step=1: adjusted register allocation (tiny refinement)
 ...
 
 [FINISH]
