@@ -47,23 +47,24 @@ Use your judgment within the category's bounds. If you identify a small but effe
 
 Unlike biological mutation, you can be smarter. Instead of blind random changes:
 1. Analyze the code to identify what COULD be optimized
-2. Pick ONE optimization direction at random
-3. Make a step toward that optimization, **up to the step category's max scope**
+2. Pick ONE direction at random - ANY direction with a remote chance of helping
+3. Commit to that direction and make it work, **up to the step category's max scope**
 
 The mutation doesn't need to fully achieve the optimization - just move in that direction. The step category sets the upper bound on how bold you can be:
 - **extensive/substantial**: You CAN make big changes, but smaller is fine too
 - **moderate**: Balanced approach
 - **small/minimal**: Keep changes conservative
 
-Think of it as "guided exploration" with an adjustable ceiling on boldness.
+Be open in direction selection. The direction doesn't need to be obviously good - SA explores broadly, and the acceptance criterion filters. Think of it as "guided exploration" with an adjustable ceiling on boldness.
 
 ## Single-Shot Mutation (CRITICAL)
 
-**Make ONE change, test correctness, RETURN. Do not iterate.**
+**Pick ONE direction, make it work, RETURN. Do not iterate for performance.**
 
 ```
 CORRECT behavior:
-  apply_change() → test() → PASS → RETURN (even if performance is worse)
+  pick_direction() → apply_change() → test() → FAIL → fix_until_correct() → RETURN
+  pick_direction() → apply_change() → test() → PASS → RETURN (even if performance is worse)
 
 WRONG behavior:
   apply_change() → test() → PASS → "hmm, let me try one more tweak" → WRONG
@@ -71,18 +72,24 @@ WRONG behavior:
 
 ### Why Single-Shot Matters
 
-In SA, the **acceptance criterion** decides whether to keep a neighbor. Your job is to **generate ONE proposal**, not to find good proposals. If you iterate/refine:
+In SA, the **acceptance criterion** decides whether to keep a neighbor. Your job is to **generate ONE proposal**, not to find good proposals. If you iterate/refine for performance:
 - You bias proposals toward improvement (breaks SA theory)
 - You waste compute on local optimization SA doesn't need
 - You distort step categories ("extensive" becomes "extensive then polished")
 - You're doing implicit filtering that changes the proposal distribution
 
-### Retry Rules
+### Correctness vs Performance
 
-- **Correctness failure** → Revert, try ONE different optimization direction, return
-- **Performance worse** → RETURN IMMEDIATELY (this is fine and expected)
-- **Performance better** → RETURN IMMEDIATELY (don't try to improve more)
-- **"Could be better"** → RETURN IMMEDIATELY (not your job to judge)
+| Situation | Action |
+|-----------|--------|
+| **Correctness failure** | Fix the change until it passes tests. Do NOT revert and try different direction - commit to your chosen direction. |
+| **Performance worse** | RETURN IMMEDIATELY (this is fine and expected) |
+| **Performance better** | RETURN IMMEDIATELY (don't try to improve more) |
+| **"Could be better"** | RETURN IMMEDIATELY (not your job to judge) |
+
+### Direction Selection
+
+Pick ANY direction that has a remote chance of improving performance. Be open - the direction doesn't need to be obviously good. SA explores; the acceptance criterion filters.
 
 The Metropolis criterion will decide acceptance. You just propose.
 
@@ -95,8 +102,9 @@ The Metropolis criterion will decide acceptance. You just propose.
 - IMPORTANT: Do NOT add comments mentioning candidate IDs or "from candidate X" - keep code clean
 - IMPORTANT: **SINGLE-SHOT** - once correct, RETURN immediately. No refinement, no "one more tweak"
 - Performance improvement is NOT required - you're exploring, not guaranteed to improve
-- If mutation breaks correctness, revert and try ONE different optimization direction (max 2 total attempts)
+- If mutation breaks correctness, FIX IT until correct. Do NOT revert and try a different direction - commit to your chosen direction.
 - The randomness is in WHICH opportunity you pick, not in the change itself
+- Direction can be ANY change that has a remote chance of improving performance - be open
 
 ## Ignore External Bias (CRITICAL for SA)
 
