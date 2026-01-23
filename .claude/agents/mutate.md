@@ -92,6 +92,7 @@ You generate proposals. The selection mechanism handles filtering.
 2. **The problem file**: `problem.py`
 
 **DO NOT read any other files.** This includes:
+- The test file (`submission_tests.py`) - run it, don't read it
 - Other candidates' code
 - Reference implementations
 - Best/elite solutions
