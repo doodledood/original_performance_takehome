@@ -8,9 +8,30 @@ disable-model-invocation: true
 
 Optimize `build_kernel()` using simulated annealing with the mutate agent.
 
+## Parameters
+
+Pass parameters via `$ARGUMENTS` (format: `--key=value`):
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--initial-temp` | 5000 | Starting temperature |
+| `--final-temp` | 10 | Stopping temperature |
+| `--cooling-rate` | 0.95 | Multiplicative cooling (T' = T × rate) |
+| `--iterations-per-temp` | 5 | Steps per temperature level |
+| `--max-iterations` | 500 | Hard limit on total iterations |
+| `--reset` | false | Clear existing state, start fresh |
+
 ## Workflow
 
-The SA logic is handled by `sa_step.sh`. Your job is simple:
+### 1. Setup (once at start)
+
+```bash
+./sa/scripts/sa_setup.sh $ARGUMENTS
+```
+
+This configures parameters and optionally resets state.
+
+### 2. Main Loop
 
 ```
 loop:
@@ -42,8 +63,14 @@ loop:
 ### Example Session
 
 ```
+Bash: ./sa/scripts/sa_setup.sh --initial-temp=5000 --reset
+Output:
+  [CONFIG] Written to .../sa_config.sh
+  [RESET] Ready for fresh start
+
 Bash: ./sa/scripts/sa_step.sh
 Output:
+  [INIT] No state found, initializing...
   [STATUS] iter=0 temp=5000 current=147734 best=147734
   MUTATE_ARGS: sa CURRENT NEIGHBOR extensive
 
@@ -55,9 +82,6 @@ Output:
   [ACCEPT] 25677 (current was 147734)
   [STATUS] iter=1 temp=5000 current=25677 best=25677
   MUTATE_ARGS: sa CURRENT NEIGHBOR extensive
-
-Task(mutate, "sa CURRENT NEIGHBOR extensive")
-  → Agent creates NEIGHBOR with mutation
 
 ... repeat ...
 
@@ -77,33 +101,15 @@ Each call handles:
    - Update best (if better than all-time best)
    - Accept/reject decision (Metropolis criterion)
    - Log iteration, update state
-   - Cool temperature (every 5 iterations)
+   - Cool temperature (every ITERATIONS_PER_TEMP iterations)
 
 2. **Check termination**:
-   - Temperature < 10 → DONE
-   - Iteration >= 500 → DONE
+   - Temperature < FINAL_TEMP → DONE
+   - Iteration >= MAX_ITERATIONS → DONE
 
 3. **Prepare next mutation**:
    - Calculate step category from temperature
    - Output MUTATE_ARGS
-
-## Configuration
-
-Edit `sa/scripts/sa_config.sh`:
-```bash
-INITIAL_TEMP=5000      # Starting temperature
-FINAL_TEMP=10          # Stopping temperature
-COOLING_RATE=0.95      # T' = T * rate
-ITERATIONS_PER_TEMP=5  # Steps per temperature level
-MAX_ITERATIONS=500     # Hard limit
-```
-
-## Fresh Start
-
-To reset and start from scratch:
-```bash
-rm -rf sa/candidates/CAND_* sa/candidates/state.txt sa/candidates/history.txt
-```
 
 ## Critical Rules
 
