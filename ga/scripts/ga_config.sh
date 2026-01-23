@@ -3,9 +3,9 @@
 # Modify via: ./ga/scripts/ga_setup.sh --population=X ...
 
 # Population settings
-POPULATION=5
-GENERATIONS=2
-OFFSPRING=3
+POPULATION=10
+GENERATIONS=10
+OFFSPRING=7
 
 # Genetic operator rates
 CROSSOVER_RATE=0.8
