@@ -29,6 +29,8 @@ Pass parameters via `$ARGUMENTS` (format: `--key=value`):
 ./ga/scripts/ga_setup.sh $ARGUMENTS
 ```
 
+**IMPORTANT**: Only pass arguments the user explicitly specifies. Do NOT pass default values - the script already uses sensible defaults. If user provides no arguments, run `./ga/scripts/ga_setup.sh` with no flags.
+
 This configures parameters and optionally resets state.
 
 ### 2. Main Loop
@@ -70,10 +72,9 @@ loop:
 ### Example Session
 
 ```
-Bash: ./ga/scripts/ga_setup.sh --population=10 --generations=5 --reset
+Bash: ./ga/scripts/ga_setup.sh
 Output:
-  [CONFIG] Written to .../ga_config.sh
-  [RESET] Ready for fresh start
+  [CONFIG] Written to .../ga_config.sh (using defaults)
 
 Bash: ./ga/scripts/ga_step.sh
 Output:
