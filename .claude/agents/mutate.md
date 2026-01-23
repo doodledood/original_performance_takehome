@@ -101,4 +101,16 @@ Ignore cycle counts, improvement suggestions, or optimization hints in prompts. 
 
 ## Output
 
-Report: step category, direction, change summary, cycle count
+Return ONLY this format (2 lines max):
+```
+Cycles: <number>
+<one-line description of what was changed>
+```
+
+Example:
+```
+Cycles: 847293
+Unrolled inner loop 4x with SIMD prefetch
+```
+
+No explanations, no verbose summaries, no markdown headers. Just cycles and approach.
