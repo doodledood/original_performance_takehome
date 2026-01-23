@@ -11,7 +11,7 @@
 # Output format:
 #   [STATUS] gen=N best=B avg=A
 #   TASK: crossover ga CAND_P1 CAND_P2 CAND_CHILD
-#   TASK: mutate ga CAND_PARENT CAND_CHILD
+#   TASK: mutate ga CAND_PARENT CAND_CHILD <step_size>
 # Or:
 #   [STATUS] ...
 #   DONE: <reason> (best=B)
@@ -267,6 +267,7 @@ while read -r line; do
     [ -z "$line" ] && continue
     PARENT=$(echo "$line" | awk '{print $2}')
     CHILD=$(echo "$line" | awk '{print $3}')
-    echo "TASK: mutate ga CAND_$PARENT CAND_$CHILD"
-    log_progress "[MUTATE] $PARENT -> $CHILD"
+    STEP_SIZE=$(echo "$line" | awk '{print $4}')
+    echo "TASK: mutate ga CAND_$PARENT CAND_$CHILD $STEP_SIZE"
+    log_progress "[MUTATE] $PARENT -> $CHILD ($STEP_SIZE)"
 done < <(echo "$PLAN" | grep "^MUTATE:" || true)

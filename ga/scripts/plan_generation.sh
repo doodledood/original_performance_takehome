@@ -3,7 +3,7 @@
 # Usage: scripts/plan_generation.sh <generation> <num_offspring> <crossover_rate> <mutation_rate>
 # Output:
 #   CROSSOVER: parent1 parent2 child_id
-#   MUTATE: parent child_id
+#   MUTATE: parent child_id step_size
 #   EVAL: child_id1 child_id2 ...
 #
 # New approach: Creates NEW candidates for offspring, doesn't modify existing ones
@@ -23,6 +23,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GA_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_ROOT="$(dirname "$GA_DIR")"
 SCORES_FILE="$GA_DIR/candidates/scores.txt"
+
+# Source config for GENERATIONS (max generations)
+source "$SCRIPT_DIR/ga_config.sh"
+
+# Calculate step size based on generation progress
+STEP_SIZE=$("$SCRIPT_DIR/calc_step_size_ga.sh" "$GEN" "$GENERATIONS")
 
 if [ ! -f "$SCORES_FILE" ]; then
     echo "ERROR: scores.txt not found. Run eval_all.sh first."
@@ -49,14 +55,14 @@ for i in $(seq 1 "$NUM_OFFSPRING"); do
         # Check if parents are identical - if so, do mutation instead
         if "$SCRIPT_DIR/parents_identical.sh" "$P1" "$P2"; then
             # Fall back to mutation
-            echo "MUTATE: $P1 $CHILD_ID"
+            echo "MUTATE: $P1 $CHILD_ID $STEP_SIZE"
         else
             echo "CROSSOVER: $P1 $P2 $CHILD_ID"
         fi
     else
         # Mutation: select one parent
         PARENT=$("$SCRIPT_DIR/select_parents.sh" "$SEED" | cut -d' ' -f1)
-        echo "MUTATE: $PARENT $CHILD_ID"
+        echo "MUTATE: $PARENT $CHILD_ID $STEP_SIZE"
     fi
 
     OFFSPRING_IDS="$OFFSPRING_IDS $CHILD_ID"
