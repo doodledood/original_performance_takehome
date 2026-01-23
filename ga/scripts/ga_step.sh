@@ -62,44 +62,89 @@ is_offspring_ready() {
 # PHASE 1: Initialize if needed
 # ============================================================
 if [ ! -f "$STATE_FILE" ]; then
-    echo "[INIT] No state found, initializing population..."
+    echo "[INIT] No state found, initializing population with diverse mutations..."
 
     # Create candidates directory
     mkdir -p "$GA_DIR/candidates"
     touch "$GA_DIR/candidates/__init__.py"
 
-    # Initialize population
+    # Initialize population (creates baseline copies)
     "$SCRIPT_DIR/init_population.sh" "$POPULATION" > /dev/null
 
-    # Evaluate baseline (all candidates are identical at start)
+    # Evaluate baseline BEFORE mutations
     BASELINE=$("$PROJECT_ROOT/scripts/eval_candidate.sh" ga 001 2>/dev/null)
     echo "[INIT] Baseline: $BASELINE cycles"
 
-    # Set all initial scores to baseline
-    for i in $(seq 1 "$POPULATION"); do
-        ID=$(printf "%03d" "$((10#$i))")
-        "$SCRIPT_DIR/update_score.sh" "$ID" "$BASELINE" > /dev/null
-    done
-
-    # Save best
-    "$SCRIPT_DIR/save_best.sh" "001" > /dev/null
-
-    # Initialize state
+    # Initialize state - set phase to init_mutate to trigger diversity mutations
     cat > "$STATE_FILE" << EOF
 GENERATION=0
 BASELINE=$BASELINE
-PHASE=breed
+PHASE=init_mutate
 OFFSPRING_IDS=
 EOF
 
     # Log to progress file
     log_progress "[START] GA optimization | pop=$POPULATION, gen=$GENERATIONS, offspring=$OFFSPRING"
-    log_progress "[INIT] Created $POPULATION candidates"
+    log_progress "[INIT] Baseline: $BASELINE cycles"
+    log_progress "[INIT] Creating diverse initial population..."
+
+    # Output mutation tasks for all candidates (except 001 which stays as baseline)
+    # Use "extensive" step category for wild/diverse initial mutations
+    for i in $(seq 2 "$POPULATION"); do
+        ID=$(printf "%03d" "$((10#$i))")
+        echo "TASK: mutate ga CAND_001 CAND_$ID extensive"
+        log_progress "[INIT_MUTATE] 001 -> $ID (extensive)"
+    done
+
+    exit 0
+fi
+
+# ============================================================
+# PHASE 1b: Post-process initial mutations
+# ============================================================
+PHASE=$(get_state PHASE)
+if [ "$PHASE" = "init_mutate" ]; then
+    BASELINE=$(get_state BASELINE)
+    echo "[INIT] Evaluating initial diverse population..."
+
+    # Evaluate all candidates (001 is baseline, others are mutated)
+    for i in $(seq 1 "$POPULATION"); do
+        ID=$(printf "%03d" "$((10#$i))")
+        KERNEL_FILE="$GA_DIR/candidates/CAND_$ID/perf_takehome.py"
+
+        if [ -f "$KERNEL_FILE" ] && [ -s "$KERNEL_FILE" ]; then
+            CYCLES=$("$PROJECT_ROOT/scripts/eval_candidate.sh" ga "$ID" 2>/dev/null || echo "ERROR")
+            if [ "$CYCLES" != "ERROR" ]; then
+                "$SCRIPT_DIR/update_score.sh" "$ID" "$CYCLES" > /dev/null
+                log_progress "[EVAL] $ID: $CYCLES cycles"
+            else
+                # If mutation failed, reset to baseline
+                echo "[WARN] Failed to evaluate $ID, resetting to baseline"
+                cp "$GA_DIR/candidates/CAND_001/perf_takehome.py" "$GA_DIR/candidates/CAND_$ID/"
+                "$SCRIPT_DIR/update_score.sh" "$ID" "$BASELINE" > /dev/null
+            fi
+        else
+            # If file missing, copy baseline
+            cp "$GA_DIR/candidates/CAND_001/perf_takehome.py" "$GA_DIR/candidates/CAND_$ID/"
+            "$SCRIPT_DIR/update_score.sh" "$ID" "$BASELINE" > /dev/null
+        fi
+    done
+
+    # Get stats and save best
+    STATS=$("$SCRIPT_DIR/get_stats.sh" "$BASELINE")
+    BEST_ID=$(echo "$STATS" | grep "^BEST:" | awk '{print $2}')
+    BEST_CYCLES=$(echo "$STATS" | grep "^BEST:" | awk '{print $3}')
+
+    "$SCRIPT_DIR/save_best.sh" "$BEST_ID" > /dev/null
+
     log_progress ""
-    log_progress "=== Generation 0 ==="
-    log_progress "Baseline: $BASELINE cycles"
+    log_progress "=== Generation 0 (Initial Diversity) ==="
+    log_progress "BEST: $BEST_ID $BEST_CYCLES"
     log_progress "=== Generation 0 COMPLETE ==="
     log_progress ""
+
+    # Transition to normal breeding phase
+    set_state PHASE "breed"
 fi
 
 # ============================================================
