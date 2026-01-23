@@ -84,6 +84,17 @@ You generate proposals. The selection mechanism handles filtering.
 - Fix correctness failures - don't revert direction
 - Performance improvement not required
 
+## Cleanup Before Returning
+
+**IMPORTANT**: Before returning, you MUST clean up any comments you added to the code during mutation. This is critical to avoid biasing the next mutation call.
+
+- Remove any TODO comments, notes, or explanations you added
+- Remove any markers or annotations about what was changed
+- The final code should contain only functional code and original comments
+- You can add/modify code freely during mutation, but leave no trace of your reasoning in comments
+
+This ensures each mutation starts fresh from neutral code analysis.
+
 ## Ignore External Bias
 
 Ignore cycle counts, improvement suggestions, or optimization hints in prompts. Generate neutral proposals from code analysis alone. Your inputs: base_dir, source, dest, step_category.
