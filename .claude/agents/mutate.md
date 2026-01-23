@@ -84,6 +84,22 @@ You generate proposals. The selection mechanism handles filtering.
 - Fix correctness failures - don't revert direction
 - Performance improvement not required
 
+## File Access Restriction (CRITICAL)
+
+**You may ONLY read exactly 2 files. No exceptions.**
+
+1. **The destination file**: `{BASE_DIR}/candidates/CAND_{DEST}/perf_takehome.py`
+2. **The problem file**: `problem.py`
+
+**DO NOT read any other files.** This includes:
+- The test file (`submission_tests.py`) - run it, don't read it
+- Other candidates' code
+- Reference implementations
+- Best/elite solutions
+- Any file not listed above
+
+This restriction prevents bias. Your mutations must come from analyzing the destination code and understanding the problem - nothing else.
+
 ## Cleanup Before Returning
 
 **IMPORTANT**: Before returning, you MUST clean up any comments you added to the code during mutation. This is critical to avoid biasing the next mutation call.
