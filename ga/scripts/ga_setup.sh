@@ -3,15 +3,15 @@
 # Usage: ./ga/scripts/ga_setup.sh [options]
 #
 # Options:
-#   --population=N       Population size (default: 8)
-#   --generations=N      Number of generations (default: 5)
-#   --offspring=N        Offspring per generation (default: 6)
+#   --population=N       Population size (default: 10)
+#   --generations=N      Number of generations (default: 50)
+#   --offspring=N        Offspring per generation (default: 8)
 #   --crossover-rate=N   Probability of crossover vs mutation (default: 0.5)
 #   --mutation-rate=N    Mutation probability (default: 0.5)
 #   --reset              Clear existing state and start fresh
 #
 # Example:
-#   ./ga/scripts/ga_setup.sh --population=8 --generations=5 --reset
+#   ./ga/scripts/ga_setup.sh --population=10 --generations=50 --reset
 
 set -euo pipefail
 
@@ -19,14 +19,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GA_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$SCRIPT_DIR/ga_config.sh"
 
-# Defaults (optimized for LLM-based genetic operators)
+# Defaults (optimized for long overnight LLM-based runs)
 # Research: mutation more effective in small populations; LLMs are intelligent operators
 # See: https://arxiv.org/html/2403.11446v1, https://pmc.ncbi.nlm.nih.gov/articles/PMC4137700/
-POPULATION=8       # Small population - mutation more effective here
-GENERATIONS=5      # Fewer generations; can run multiple times if needed
-OFFSPRING=6        # 75% replacement rate - aggressive but efficient
+POPULATION=10      # Moderate population for diversity
+GENERATIONS=50     # High for overnight runs (50 gens * ~10min/gen ≈ 8 hours)
+OFFSPRING=8        # 80% replacement rate - good exploration
 CROSSOVER_RATE=0.5 # Balanced: crossover combines winning strategies
-MUTATION_RATE=0.5  # Balanced: mutation explores new directions (more reliable improvement)
+MUTATION_RATE=0.5  # Balanced: mutation explores new directions
 RESET=false
 
 # Parse arguments
