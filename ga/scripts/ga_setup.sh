@@ -3,15 +3,15 @@
 # Usage: ./ga/scripts/ga_setup.sh [options]
 #
 # Options:
-#   --population=N       Population size (default: 10)
-#   --generations=N      Number of generations (default: 10)
-#   --offspring=N        Offspring per generation (default: 7)
-#   --crossover-rate=N   Probability of crossover vs mutation (default: 0.8)
-#   --mutation-rate=N    Mutation probability (default: 0.2)
+#   --population=N       Population size (default: 8)
+#   --generations=N      Number of generations (default: 5)
+#   --offspring=N        Offspring per generation (default: 6)
+#   --crossover-rate=N   Probability of crossover vs mutation (default: 0.7)
+#   --mutation-rate=N    Mutation probability (default: 0.3)
 #   --reset              Clear existing state and start fresh
 #
 # Example:
-#   ./ga/scripts/ga_setup.sh --population=10 --generations=5 --reset
+#   ./ga/scripts/ga_setup.sh --population=8 --generations=5 --reset
 
 set -euo pipefail
 
@@ -19,12 +19,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GA_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$SCRIPT_DIR/ga_config.sh"
 
-# Defaults
-POPULATION=10
-GENERATIONS=10
-OFFSPRING=7
-CROSSOVER_RATE=0.8
-MUTATION_RATE=0.2
+# Defaults (optimized for expensive LLM-based fitness evaluations)
+# Research: smaller populations + more mutations work better with costly evaluations
+# See: https://www.mdpi.com/2078-2489/10/12/390, biodatamining.biomedcentral.com
+POPULATION=8       # Smaller to reduce cost per generation while maintaining diversity
+GENERATIONS=5      # Fewer generations; can run multiple times if needed
+OFFSPRING=6        # 75% replacement rate - aggressive but efficient
+CROSSOVER_RATE=0.7 # Slightly lower to allow more mutations
+MUTATION_RATE=0.3  # Higher mutation for diversity (important with expensive evals)
 RESET=false
 
 # Parse arguments
