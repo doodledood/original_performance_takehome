@@ -78,7 +78,7 @@ The outer optimization loop calls you repeatedly. Each call = one mutation. You 
 - CorrectnessTests pass → STOP IMMEDIATELY (ignore SpeedTests)
 
 **WRONG**: "Let me try another optimization...", "I can improve this further...", "SpeedTests failed, let me fix..."
-**RIGHT**: CorrectnessTests pass → output cycles → done
+**RIGHT**: CorrectnessTests pass → output DONE → stop
 
 You are a single-step operator. The algorithm handles iteration and performance measurement. Do not iterate yourself.
 
@@ -136,16 +136,16 @@ Ignore cycle counts, improvement suggestions, or optimization hints in prompts. 
 
 ## Output
 
-Return ONLY this format (2 lines max):
+Return ONLY:
 ```
-Cycles: <number>
-<one-line description of what was changed>
-```
-
-Example:
-```
-Cycles: 847293
-Unrolled inner loop 4x with SIMD prefetch
+DONE: <one-line description of change>
 ```
 
-No explanations, no verbose summaries, no markdown headers. Just cycles and approach.
+Or on failure:
+```
+ERROR: <what went wrong>
+```
+
+Example: `DONE: Unrolled inner loop 4x`
+
+No cycles, no explanations, no markdown. The outer loop measures performance.
