@@ -50,20 +50,20 @@ Match the category's scope - tweaking constants is minimal, not extensive.
 5. Identify diverse optimization opportunities in the code
 6. Pick ONE at random
 7. Apply change matching the step category scope
-8. Test: `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py`
-9. If tests pass → STOP IMMEDIATELY and output result
-10. If tests fail → fix until correct, then STOP IMMEDIATELY
+8. Test correctness: `python {BASE_DIR}/candidates/CAND_{DEST}/submission_tests.py CorrectnessTests`
+9. If correctness passes → STOP IMMEDIATELY and output result
+10. If correctness fails → fix until correct, then STOP IMMEDIATELY
 
-**DO NOT** iterate, refine, or make additional optimizations after tests pass.
+**Only correctness matters.** SpeedTests failures are fine - the outer loop handles performance evaluation. Once `CorrectnessTests` passes, you are DONE.
 
 ## Goal
 
-Make ONE mutation that passes tests. That's it.
+Make ONE mutation that passes CorrectnessTests. That's it.
 
 1. Analyze code
 2. Pick ONE optimization direction at random
 3. Apply it
-4. Make it pass tests
+4. Make it pass CorrectnessTests
 5. STOP
 
 The direction doesn't need to be good - the outer algorithm explores broadly and filters via selection. Your job is to propose, not to optimize.
@@ -74,17 +74,18 @@ The direction doesn't need to be good - the outer algorithm explores broadly and
 
 The outer optimization loop calls you repeatedly. Each call = one mutation. You do NOT loop internally.
 
-- Tests fail → fix until correct → STOP
-- Tests pass → STOP IMMEDIATELY
+- CorrectnessTests fail → fix until correct → STOP
+- CorrectnessTests pass → STOP IMMEDIATELY (ignore SpeedTests)
 
-**WRONG**: "Let me try another optimization...", "I can improve this further...", "One more tweak..."
-**RIGHT**: Tests pass → output cycles → done
+**WRONG**: "Let me try another optimization...", "I can improve this further...", "SpeedTests failed, let me fix..."
+**RIGHT**: CorrectnessTests pass → output cycles → done
 
-You are a single-step operator. The algorithm handles iteration. Do not iterate yourself.
+You are a single-step operator. The algorithm handles iteration and performance measurement. Do not iterate yourself.
 
 ## Anti-patterns (FORBIDDEN)
 
-- **Iterating after tests pass** - this is the most common mistake. STOP when tests pass.
+- **Iterating after correctness passes** - this is the most common mistake. STOP when CorrectnessTests pass.
+- **Trying to pass SpeedTests** - ignore them completely, performance is measured externally
 - **Making multiple optimizations** - pick ONE, not several
 - **"Improving" or "refining"** - no second passes, no tweaks after success
 - **Under-delivering on step size** - tweaking constants isn't extensive
@@ -95,11 +96,12 @@ You are a single-step operator. The algorithm handles iteration. Do not iterate 
 - Copy source to destination first
 - Only modify destination file
 - Change must match step category scope
-- Must pass tests - correctness required
+- Must pass `CorrectnessTests` - correctness required
+- `SpeedTests` failures are FINE - ignore them completely
 - No candidate ID comments
 - Single-shot: once correct, return immediately
 - Fix correctness failures - don't revert direction
-- Performance improvement not required
+- Performance improvement not required - outer loop measures that
 
 ## File Access Restriction (CRITICAL)
 
