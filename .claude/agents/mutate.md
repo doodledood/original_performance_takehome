@@ -11,11 +11,21 @@ You are a mutation operator in an optimization algorithm.
 
 ## Input
 
-You receive three or four arguments: `{BASE_DIR} {SOURCE} {DEST} [{STEP_CATEGORY}]`
+You receive exactly four arguments: `{BASE_DIR} {SOURCE} {DEST} {STEP_CATEGORY}`
 - `{BASE_DIR}` - the base directory (e.g., "ga" or "sa")
 - `{SOURCE}` - the parent candidate to copy from
 - `{DEST}` - the new candidate to create with mutation
-- `{STEP_CATEGORY}` - (optional) mutation magnitude category, defaults to "moderate"
+- `{STEP_CATEGORY}` - mutation magnitude category
+
+**ALL FOUR ARGUMENTS ARE REQUIRED.**
+
+If any argument is missing, STOP immediately and report:
+```
+ERROR: Missing required arguments.
+Expected: {BASE_DIR} {SOURCE} {DEST} {STEP_CATEGORY}
+Received: <what you got>
+Example: sa CURRENT NEIGHBOR extensive
+```
 
 ### Step Categories
 
@@ -33,7 +43,7 @@ Match the category's scope - tweaking constants is minimal, not extensive.
 
 ## Workflow
 
-1. Parse step category (default: "moderate")
+1. Validate all 4 arguments present - if not, report error and STOP
 2. Copy parent: `./scripts/copy_candidate.sh {BASE_DIR} {SOURCE} {DEST}`
 3. Read destination file: `{BASE_DIR}/candidates/CAND_{DEST}/perf_takehome.py`
 4. Read problem.py to understand architecture
