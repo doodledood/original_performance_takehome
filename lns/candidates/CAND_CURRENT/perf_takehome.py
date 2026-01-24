@@ -94,8 +94,8 @@ class KernelBuilder:
         self, forest_height: int, n_nodes: int, batch_size: int, rounds: int
     ):
         """
-        Deep software pipelining: overlaps memory loads for future chunks with
-        computation on current chunks, creating a deep multi-stage pipeline.
+        Instruction-interleaved implementation: interleaves independent operations
+        across different chunks to hide latency and maximize VLIW utilization.
         """
         init_vars = [
             "rounds",
@@ -222,52 +222,101 @@ class KernelBuilder:
                                  ("+", addr_tmp2, self.scratch["inp_values_p"], next_i_const)]})
 
         for round_num in range(rounds):
-            for c in range(n_chunks):
-                if c == 0:
-                    body.append({"valu": [("+", addr_vecs[c], forest_p_vec, idx_chunks[c])]})
+            for c in range(0, n_chunks, 6):
+                ops = []
+                for cc in range(c, min(c + 6, n_chunks)):
+                    ops.append(("+", addr_vecs[cc], forest_p_vec, idx_chunks[cc]))
+                body.append({"valu": ops})
 
+            xor_queue = []
+            for c in range(n_chunks):
                 addr_vec = addr_vecs[c]
                 node_val_vec = node_val_vecs[c]
-
-                if c + 1 < n_chunks:
+                if c > 0:
+                    xor_queue.append(("^", val_chunks[c-1], val_chunks[c-1], node_val_vecs[c-1]))
+                xor_batch = xor_queue[:6]
+                xor_queue = xor_queue[6:]
+                if xor_batch:
                     body.append({"load": [("load", node_val_vec, addr_vec),
                                           ("load", node_val_vec + 1, addr_vec + 1)],
-                                 "valu": [("+", addr_vecs[c+1], forest_p_vec, idx_chunks[c+1])]})
+                                 "valu": xor_batch})
                 else:
                     body.append({"load": [("load", node_val_vec, addr_vec),
                                           ("load", node_val_vec + 1, addr_vec + 1)]})
-
                 body.append({"load": [("load", node_val_vec + 2, addr_vec + 2),
                                       ("load", node_val_vec + 3, addr_vec + 3)]})
                 body.append({"load": [("load", node_val_vec + 4, addr_vec + 4),
                                       ("load", node_val_vec + 5, addr_vec + 5)]})
                 body.append({"load": [("load", node_val_vec + 6, addr_vec + 6),
                                       ("load", node_val_vec + 7, addr_vec + 7)]})
+            xor_queue.append(("^", val_chunks[n_chunks-1], val_chunks[n_chunks-1], node_val_vecs[n_chunks-1]))
+            while xor_queue:
+                xor_batch = xor_queue[:6]
+                xor_queue = xor_queue[6:]
+                body.append({"valu": xor_batch})
 
-                body.append({"valu": [("^", val_chunks[c], val_chunks[c], node_val_vec)]})
-
-                for hi, (op1, val1, op2, op3, val3) in enumerate(HASH_STAGES):
-                    val1_vec, val3_vec, _, _ = hash_const_vecs[hi]
-                    if hi in mul_vecs:
-                        mul_vec = mul_vecs[hi]
-                        body.append({"valu": [("multiply_add", val_chunks[c], val_chunks[c], mul_vec, val1_vec)]})
-                    else:
-                        body.append({"valu": [(op1, hash_t1s[0], val_chunks[c], val1_vec),
-                                              (op3, hash_t2s[0], val_chunks[c], val3_vec)]})
-                        body.append({"valu": [(op2, val_chunks[c], hash_t1s[0], hash_t2s[0])]})
-
-                body.append({"valu": [("&", hash_t2s[0], val_chunks[c], one_vec),
-                                      ("multiply_add", idx_chunks[c], idx_chunks[c], mul_2_vec, one_vec)]})
-                body.append({"valu": [("+", idx_chunks[c], idx_chunks[c], hash_t2s[0])]})
-                body.append({"valu": [("<", bounds_masks[0], idx_chunks[c], n_nodes_vec)]})
-                if c + 1 < n_chunks:
-                    body.append({"valu": [("*", idx_chunks[c], idx_chunks[c], bounds_masks[0]),
-                                          ("+", addr_vecs[c+1], forest_p_vec, idx_chunks[c+1])]})
+            for hi, (op1, val1, op2, op3, val3) in enumerate(HASH_STAGES):
+                val1_vec, val3_vec, _, _ = hash_const_vecs[hi]
+                if hi in mul_vecs:
+                    mul_vec = mul_vecs[hi]
+                    for c in range(0, n_chunks, 6):
+                        ma_ops = []
+                        for cc in range(c, min(c + 6, n_chunks)):
+                            ma_ops.append(("multiply_add", val_chunks[cc], val_chunks[cc], mul_vec, val1_vec))
+                        body.append({"valu": ma_ops})
                 else:
-                    body.append({"valu": [("*", idx_chunks[c], idx_chunks[c], bounds_masks[0])]})
+                    for g in range(0, n_chunks, 6):
+                        group_end = min(g + 6, n_chunks)
+                        for c in range(g, group_end, 3):
+                            step1_ops = []
+                            for cc in range(c, min(c + 3, group_end)):
+                                tmp_idx = cc - g
+                                step1_ops.append((op1, hash_t1s[tmp_idx], val_chunks[cc], val1_vec))
+                                step1_ops.append((op3, hash_t2s[tmp_idx], val_chunks[cc], val3_vec))
+                            body.append({"valu": step1_ops})
+                        step2_ops = []
+                        for cc in range(g, group_end):
+                            tmp_idx = cc - g
+                            step2_ops.append((op2, val_chunks[cc], hash_t1s[tmp_idx], hash_t2s[tmp_idx]))
+                        body.append({"valu": step2_ops})
 
-        body.append({"alu": [("+", addr_tmp, self.scratch["inp_indices_p"], i_const_0),
-                             ("+", addr_tmp2, self.scratch["inp_values_p"], i_const_0)]})
+            for g in range(0, n_chunks, 6):
+                group_end = min(g + 6, n_chunks)
+                group_size = group_end - g
+                and_ops = []
+                ma_ops = []
+                for cc in range(g, group_end):
+                    tmp_idx = cc - g
+                    and_ops.append(("&", hash_t2s[tmp_idx], val_chunks[cc], one_vec))
+                    ma_ops.append(("multiply_add", idx_chunks[cc], idx_chunks[cc], mul_2_vec, one_vec))
+                if group_size <= 3:
+                    body.append({"valu": and_ops + ma_ops})
+                else:
+                    body.append({"valu": and_ops})
+                    body.append({"valu": ma_ops})
+
+                add_ops = []
+                for cc in range(g, group_end):
+                    tmp_idx = cc - g
+                    add_ops.append(("+", idx_chunks[cc], idx_chunks[cc], hash_t2s[tmp_idx]))
+                body.append({"valu": add_ops})
+
+                cmp_ops = []
+                for cc in range(g, group_end):
+                    tmp_idx = cc - g
+                    cmp_ops.append(("<", bounds_masks[tmp_idx], idx_chunks[cc], n_nodes_vec))
+                body.append({"valu": cmp_ops})
+
+                mul_ops = []
+                for cc in range(g, group_end):
+                    tmp_idx = cc - g
+                    mul_ops.append(("*", idx_chunks[cc], idx_chunks[cc], bounds_masks[tmp_idx]))
+                if round_num == rounds - 1 and g == 0:
+                    body.append({"valu": mul_ops,
+                                 "alu": [("+", addr_tmp, self.scratch["inp_indices_p"], i_const_0),
+                                         ("+", addr_tmp2, self.scratch["inp_values_p"], i_const_0)]})
+                else:
+                    body.append({"valu": mul_ops})
 
         next_i_const_0 = self.scratch_const(VLEN)
         body.append({"store": [("vstore", addr_tmp, idx_chunks[0]),
