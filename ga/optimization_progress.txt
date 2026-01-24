@@ -1,0 +1,660 @@
+[START] GA optimization | pop=10, gen=50, offspring=8
+[INIT] Baseline: 147734 cycles
+[INIT] Creating diverse initial population...
+[INIT_MUTATE] 001 -> 002 (extensive)
+[INIT_MUTATE] 001 -> 003 (extensive)
+[INIT_MUTATE] 001 -> 004 (extensive)
+[INIT_MUTATE] 001 -> 005 (extensive)
+[INIT_MUTATE] 001 -> 006 (extensive)
+[INIT_MUTATE] 001 -> 007 (extensive)
+[INIT_MUTATE] 001 -> 008 (extensive)
+[INIT_MUTATE] 001 -> 009 (extensive)
+[INIT_MUTATE] 001 -> 010 (extensive)
+[EVAL] 001: 147734 cycles
+[EVAL] 002: 25677 cycles
+[EVAL] 003: 25677 cycles
+[EVAL] 004: 25677 cycles
+[EVAL] 005: 29776 cycles
+[EVAL] 006: 31809 cycles
+[EVAL] 007: 22607 cycles
+[EVAL] 008: 25677 cycles
+[EVAL] 009: 22605 cycles
+[EVAL] 010: 25771 cycles
+
+=== Generation 0 (Initial Diversity) ===
+BEST: 009 22605
+=== Generation 0 COMPLETE ===
+
+[PLAN] Generation 1
+[CROSSOVER] 009 + 007 -> 011
+[CROSSOVER] 003 + 007 -> 013
+[CROSSOVER] 007 + 009 -> 014
+[CROSSOVER] 007 + 009 -> 015
+[CROSSOVER] 003 + 007 -> 016
+[CROSSOVER] 002 + 009 -> 017
+[MUTATE] 009 -> 012 (extensive)
+[MUTATE] 004 -> 018 (extensive)
+=== Generation 1 ===
+[EVAL] 011: 22606 cycles
+[EVAL] 012: 15437 cycles
+[EVAL] 013: 22607 cycles
+[EVAL] 014: 22607 cycles
+[EVAL] 015: 22607 cycles
+[EVAL] 016: 25681 cycles
+[EVAL] 017: 22605 cycles
+[EVAL] 018: 15950 cycles
+[SELECT] Kept: 012 018 009 017 011 007 013 014 015 002 
+[SELECT] Deleted: 003 004 008 016 010 005 006 001 
+
+BEST: 012 15437
+AVG: 21531
+IMPROVEMENT: 89.6%
+=== Generation 1 COMPLETE ===
+
+[PLAN] Generation 2
+[CROSSOVER] 012 + 017 -> 019
+[CROSSOVER] 017 + 009 -> 025
+[MUTATE] 012 -> 020 (extensive)
+[MUTATE] 012 -> 021 (extensive)
+[MUTATE] 018 -> 022 (extensive)
+[MUTATE] 012 -> 023 (extensive)
+[MUTATE] 012 -> 024 (extensive)
+[MUTATE] 017 -> 026 (extensive)
+=== Generation 2 ===
+[EVAL] 019: 17485 cycles
+[EVAL] 020: 9549 cycles
+[EVAL] 021: 9549 cycles
+[EVAL] 022: 15950 cycles
+[EVAL] 023: 9549 cycles
+[EVAL] 024: 15936 cycles
+[EVAL] 025: 22605 cycles
+[EVAL] 026: 14916 cycles
+[SELECT] Kept: 020 021 023 026 012 024 018 022 019 009 
+[SELECT] Deleted: 017 025 011 007 013 014 015 002 
+
+BEST: 020 9549
+AVG: 14693
+IMPROVEMENT: 93.5%
+=== Generation 2 COMPLETE ===
+
+[PLAN] Generation 3
+[CROSSOVER] 021 + 020 -> 029
+[CROSSOVER] 023 + 020 -> 030
+[CROSSOVER] 020 + 021 -> 031
+[CROSSOVER] 026 + 023 -> 032
+[CROSSOVER] 023 + 021 -> 033
+[MUTATE] 021 -> 027 (extensive)
+[MUTATE] 023 -> 028 (extensive)
+[MUTATE] 023 -> 034 (extensive)
+=== Generation 3 ===
+[EVAL] 027: 7757 cycles
+[EVAL] 028: 8029 cycles
+[EVAL] 029: 9549 cycles
+[EVAL] 030: 9549 cycles
+[EVAL] 031: 9549 cycles
+[EVAL] 032: 9540 cycles
+[EVAL] 033: 9549 cycles
+[EVAL] 034: 7757 cycles
+[SELECT] Kept: 027 034 028 032 020 021 023 029 030 031 
+[SELECT] Deleted: 033 026 012 024 018 022 019 009 
+
+BEST: 027 7757
+AVG: 9038
+IMPROVEMENT: 94.7%
+=== Generation 3 COMPLETE ===
+
+[PLAN] Generation 4
+[CROSSOVER] 034 + 032 -> 036
+[CROSSOVER] 028 + 027 -> 037
+[CROSSOVER] 034 + 027 -> 039
+[CROSSOVER] 027 + 034 -> 041
+[MUTATE] 027 -> 035 (extensive)
+[MUTATE] 027 -> 038 (extensive)
+[MUTATE] 034 -> 040 (extensive)
+[MUTATE] 027 -> 042 (extensive)
+=== Generation 4 ===
+[EVAL] 035: 7630 cycles
+[EVAL] 036: 7757 cycles
+[EVAL] 037: 8029 cycles
+[EVAL] 038: 7245 cycles
+[EVAL] 039: 7757 cycles
+[EVAL] 040: 7757 cycles
+[EVAL] 041: 7757 cycles
+[EVAL] 042: 6749 cycles
+[SELECT] Kept: 042 038 035 027 034 036 039 040 041 028 
+[SELECT] Deleted: 037 032 020 021 023 029 030 031 
+
+BEST: 042 6749
+AVG: 7620
+IMPROVEMENT: 95.4%
+=== Generation 4 COMPLETE ===
+
+[PLAN] Generation 5
+[CROSSOVER] 042 + 038 -> 043
+[CROSSOVER] 027 + 035 -> 047
+[CROSSOVER] 042 + 038 -> 050
+[MUTATE] 038 -> 044 (extensive)
+[MUTATE] 042 -> 045 (extensive)
+[MUTATE] 038 -> 046 (extensive)
+[MUTATE] 027 -> 048 (extensive)
+[MUTATE] 042 -> 049 (extensive)
+=== Generation 5 ===
+[EVAL] 043: 6269 cycles
+[EVAL] 044: 7245 cycles
+[EVAL] 045: 7245 cycles
+[EVAL] 046: 7245 cycles
+[EVAL] 047: 7630 cycles
+[EVAL] 048: 7309 cycles
+[EVAL] 049: 6797 cycles
+[EVAL] 050: 6237 cycles
+[SELECT] Kept: 050 043 042 049 038 044 045 046 048 035 
+[SELECT] Deleted: 047 027 034 036 039 040 041 028 
+
+BEST: 050 6237
+AVG: 6997
+IMPROVEMENT: 95.8%
+=== Generation 5 COMPLETE ===
+
+[PLAN] Generation 6
+[CROSSOVER] 050 + 043 -> 051
+[CROSSOVER] 050 + 049 -> 052
+[MUTATE] 049 -> 053 (extensive)
+[MUTATE] 050 -> 054 (extensive)
+[MUTATE] 042 -> 055 (extensive)
+[MUTATE] 042 -> 056 (extensive)
+[MUTATE] 050 -> 057 (extensive)
+[MUTATE] 043 -> 058 (extensive)
+=== Generation 6 ===
+[EVAL] 051: 6717 cycles
+[EVAL] 052: 6285 cycles
+[EVAL] 053: 6813 cycles
+[EVAL] 054: 6157 cycles
+[EVAL] 055: 6797 cycles
+[EVAL] 056: 7757 cycles
+[EVAL] 057: 6221 cycles
+[EVAL] 058: 6189 cycles
+[SELECT] Kept: 054 058 057 050 043 052 051 042 049 055 
+[SELECT] Deleted: 053 038 044 045 046 048 035 056 
+
+BEST: 054 6157
+AVG: 6442
+IMPROVEMENT: 95.8%
+=== Generation 6 COMPLETE ===
+
+[PLAN] Generation 7
+[CROSSOVER] 058 + 050 -> 059
+[CROSSOVER] 050 + 057 -> 061
+[CROSSOVER] 054 + 057 -> 062
+[CROSSOVER] 054 + 057 -> 064
+[CROSSOVER] 058 + 050 -> 066
+[MUTATE] 050 -> 060 (extensive)
+[MUTATE] 057 -> 063 (extensive)
+[MUTATE] 054 -> 065 (extensive)
+=== Generation 7 ===
+[EVAL] 059: 6189 cycles
+[EVAL] 060: 6237 cycles
+[EVAL] 061: 6221 cycles
+[EVAL] 062: 6173 cycles
+[EVAL] 063: 6158 cycles
+[EVAL] 064: 6173 cycles
+[EVAL] 065: 6173 cycles
+[EVAL] 066: 6189 cycles
+[SELECT] Kept: 054 063 062 064 065 058 059 066 057 061 
+[SELECT] Deleted: 050 060 043 052 051 042 049 055 
+
+BEST: 054 6157
+AVG: 6184
+IMPROVEMENT: 95.8%
+=== Generation 7 COMPLETE ===
+
+[PLAN] Generation 8
+[CROSSOVER] 054 + 063 -> 068
+[CROSSOVER] 054 + 064 -> 069
+[CROSSOVER] 062 + 054 -> 070
+[CROSSOVER] 063 + 064 -> 071
+[CROSSOVER] 063 + 062 -> 072
+[MUTATE] 065 -> 067 (extensive)
+[MUTATE] 065 -> 073 (extensive)
+[MUTATE] 063 -> 074 (extensive)
+=== Generation 8 ===
+[EVAL] 067: 6173 cycles
+[EVAL] 068: 6142 cycles
+[EVAL] 069: 6173 cycles
+[EVAL] 070: 6237 cycles
+[EVAL] 071: 6174 cycles
+[EVAL] 072: 6174 cycles
+[EVAL] 073: 5725 cycles
+[EVAL] 074: 6238 cycles
+[SELECT] Kept: 073 068 054 063 062 064 065 067 069 071 
+[SELECT] Deleted: 072 058 059 066 057 061 070 074 
+
+BEST: 073 5725
+AVG: 6122
+IMPROVEMENT: 96.1%
+=== Generation 8 COMPLETE ===
+
+[PLAN] Generation 9
+[CROSSOVER] 068 + 073 -> 074
+[CROSSOVER] 073 + 063 -> 079
+[CROSSOVER] 073 + 063 -> 080
+[CROSSOVER] 054 + 073 -> 081
+[MUTATE] 054 -> 075 (extensive)
+[MUTATE] 073 -> 076 (extensive)
+[MUTATE] 073 -> 077 (extensive)
+[MUTATE] 073 -> 078 (extensive)
+=== Generation 9 ===
+[EVAL] 074: 5726 cycles
+[EVAL] 075: 6173 cycles
+[EVAL] 076: 5725 cycles
+[EVAL] 077: 5725 cycles
+[EVAL] 078: 5725 cycles
+[EVAL] 079: 6158 cycles
+[EVAL] 080: 6173 cycles
+[EVAL] 081: 5741 cycles
+[SELECT] Kept: 073 076 077 078 074 081 068 054 063 079 
+[SELECT] Deleted: 062 064 065 067 069 075 080 071 
+
+BEST: 073 5725
+AVG: 5898
+IMPROVEMENT: 96.1%
+=== Generation 9 COMPLETE ===
+
+[PLAN] Generation 10
+[CROSSOVER] 073 + 076 -> 083
+[CROSSOVER] 077 + 076 -> 085
+[CROSSOVER] 073 + 076 -> 086
+[CROSSOVER] 073 + 078 -> 088
+[CROSSOVER] 076 + 078 -> 089
+[MUTATE] 073 -> 082 (extensive)
+[MUTATE] 078 -> 084 (extensive)
+[MUTATE] 077 -> 087 (extensive)
+=== Generation 10 ===
+[EVAL] 082: 5725 cycles
+[EVAL] 083: 5725 cycles
+[EVAL] 084: 5725 cycles
+[EVAL] 085: 5725 cycles
+[EVAL] 086: 5725 cycles
+[EVAL] 087: 5725 cycles
+[EVAL] 088: 5725 cycles
+[EVAL] 089: 5725 cycles
+[SELECT] Kept: 073 076 077 078 082 083 084 085 086 087 
+[SELECT] Deleted: 088 089 074 081 068 054 063 079 
+
+BEST: 073 5725
+AVG: 5725
+IMPROVEMENT: 96.1%
+=== Generation 10 COMPLETE ===
+
+[PLAN] Generation 11
+[CROSSOVER] 076 + 077 -> 091
+[CROSSOVER] 073 + 078 -> 092
+[CROSSOVER] 076 + 082 -> 093
+[CROSSOVER] 076 + 082 -> 094
+[CROSSOVER] 078 + 082 -> 095
+[MUTATE] 082 -> 088 (extensive)
+[MUTATE] 077 -> 089 (extensive)
+[MUTATE] 077 -> 090 (extensive)
+=== Generation 11 ===
+[EVAL] 088: 5597 cycles
+[EVAL] 089: 5724 cycles
+[EVAL] 090: 5725 cycles
+[EVAL] 091: 5725 cycles
+[EVAL] 092: 5725 cycles
+[EVAL] 093: 5725 cycles
+[EVAL] 094: 5725 cycles
+[EVAL] 095: 5725 cycles
+[SELECT] Kept: 088 089 073 076 077 078 082 083 084 085 
+[SELECT] Deleted: 086 087 090 091 092 093 094 095 
+
+BEST: 088 5597
+AVG: 5712
+IMPROVEMENT: 96.2%
+=== Generation 11 COMPLETE ===
+
+[PLAN] Generation 12
+[CROSSOVER] 073 + 088 -> 092
+[CROSSOVER] 088 + 077 -> 094
+[CROSSOVER] 073 + 077 -> 095
+[CROSSOVER] 073 + 088 -> 096
+[MUTATE] 088 -> 090 (extensive)
+[MUTATE] 073 -> 091 (extensive)
+[MUTATE] 089 -> 093 (extensive)
+[MUTATE] 077 -> 097 (extensive)
+=== Generation 12 ===
+[EVAL] 090: 5582 cycles
+[EVAL] 091: 5725 cycles
+[EVAL] 092: 5597 cycles
+[EVAL] 093: 5724 cycles
+[EVAL] 094: 5597 cycles
+[EVAL] 095: 5725 cycles
+[EVAL] 096: 5725 cycles
+[EVAL] 097: 5725 cycles
+[SELECT] Kept: 090 088 092 094 089 093 073 076 077 078 
+[SELECT] Deleted: 082 083 084 085 091 095 096 097 
+
+BEST: 090 5582
+AVG: 5672
+IMPROVEMENT: 96.2%
+=== Generation 12 COMPLETE ===
+
+[PLAN] Generation 13
+[CROSSOVER] 090 + 092 -> 095
+[CROSSOVER] 094 + 090 -> 096
+[CROSSOVER] 092 + 090 -> 097
+[CROSSOVER] 090 + 092 -> 098
+[CROSSOVER] 090 + 088 -> 099
+[CROSSOVER] 090 + 088 -> 100
+[MUTATE] 090 -> 101 (extensive)
+[MUTATE] 092 -> 102 (extensive)
+=== Generation 13 ===
+[EVAL] 095: 5582 cycles
+[EVAL] 096: 5582 cycles
+[EVAL] 097: 5582 cycles
+[EVAL] 098: 5582 cycles
+[EVAL] 099: 5582 cycles
+[EVAL] 100: 5597 cycles
+[EVAL] 101: 5678 cycles
+[EVAL] 102: 5597 cycles
+[SELECT] Kept: 090 095 096 097 098 099 088 092 094 100 
+[SELECT] Deleted: 102 101 089 093 073 076 077 078 
+
+BEST: 090 5582
+AVG: 5588
+IMPROVEMENT: 96.2%
+=== Generation 13 COMPLETE ===
+
+[PLAN] Generation 14
+[CROSSOVER] 095 + 098 -> 101
+[CROSSOVER] 090 + 097 -> 103
+[CROSSOVER] 097 + 098 -> 105
+[CROSSOVER] 096 + 090 -> 106
+[MUTATE] 095 -> 102 (extensive)
+[MUTATE] 098 -> 104 (extensive)
+[MUTATE] 096 -> 107 (extensive)
+[MUTATE] 090 -> 108 (extensive)
+=== Generation 14 ===
+[EVAL] 101: 5582 cycles
+[EVAL] 102: 5582 cycles
+[EVAL] 103: 5582 cycles
+[EVAL] 104: 5582 cycles
+[EVAL] 105: 5582 cycles
+[EVAL] 106: 5582 cycles
+[EVAL] 107: 5582 cycles
+[EVAL] 108: 5454 cycles
+[SELECT] Kept: 108 090 095 096 097 098 099 101 102 103 
+[SELECT] Deleted: 104 105 106 107 088 092 094 100 
+
+BEST: 108 5454
+AVG: 5569
+IMPROVEMENT: 96.3%
+=== Generation 14 COMPLETE ===
+
+[PLAN] Generation 15
+[CROSSOVER] 108 + 096 -> 110
+[CROSSOVER] 090 + 096 -> 113
+[CROSSOVER] 096 + 097 -> 114
+[CROSSOVER] 096 + 095 -> 115
+[CROSSOVER] 090 + 096 -> 116
+[MUTATE] 108 -> 109 (extensive)
+[MUTATE] 095 -> 111 (extensive)
+[MUTATE] 095 -> 112 (extensive)
+=== Generation 15 ===
+[EVAL] 109: 5454 cycles
+[EVAL] 110: 5454 cycles
+[EVAL] 111: 5582 cycles
+[EVAL] 112: 5582 cycles
+[EVAL] 113: 5582 cycles
+[EVAL] 114: 5582 cycles
+[EVAL] 115: 5582 cycles
+[EVAL] 116: 5582 cycles
+[SELECT] Kept: 108 109 110 090 095 096 097 098 099 101 
+[SELECT] Deleted: 102 103 111 112 113 114 115 116 
+
+BEST: 108 5454
+AVG: 5544
+IMPROVEMENT: 96.3%
+=== Generation 15 COMPLETE ===
+
+[PLAN] Generation 16
+[CROSSOVER] 110 + 109 -> 113
+[CROSSOVER] 108 + 109 -> 116
+[CROSSOVER] 108 + 110 -> 118
+[MUTATE] 109 -> 111 (extensive)
+[MUTATE] 110 -> 112 (extensive)
+[MUTATE] 109 -> 114 (extensive)
+[MUTATE] 095 -> 115 (extensive)
+[MUTATE] 109 -> 117 (extensive)
+=== Generation 16 ===
+[EVAL] 111: 5454 cycles
+[EVAL] 112: 5454 cycles
+[EVAL] 113: 5454 cycles
+[EVAL] 114: 5454 cycles
+[EVAL] 115: 5582 cycles
+[EVAL] 116: 5454 cycles
+[EVAL] 117: 5454 cycles
+[EVAL] 118: 5454 cycles
+[SELECT] Kept: 108 109 110 111 112 113 114 116 117 118 
+[SELECT] Deleted: 090 095 096 097 098 099 101 115 
+
+BEST: 108 5454
+AVG: 5454
+IMPROVEMENT: 96.3%
+=== Generation 16 COMPLETE ===
+
+[PLAN] Generation 17
+[CROSSOVER] 108 + 110 -> 120
+[CROSSOVER] 110 + 109 -> 121
+[CROSSOVER] 109 + 112 -> 122
+[MUTATE] 108 -> 119 (extensive)
+[MUTATE] 109 -> 123 (extensive)
+[MUTATE] 108 -> 124 (extensive)
+[MUTATE] 108 -> 125 (extensive)
+[MUTATE] 112 -> 126 (extensive)
+=== Generation 17 ===
+[EVAL] 119: 5454 cycles
+[EVAL] 120: 5454 cycles
+[EVAL] 121: 5454 cycles
+[EVAL] 122: 5454 cycles
+[EVAL] 123: 5454 cycles
+[EVAL] 124: 5454 cycles
+[EVAL] 125: 5454 cycles
+[EVAL] 126: 5518 cycles
+[SELECT] Kept: 108 109 110 111 112 113 114 116 117 118 
+[SELECT] Deleted: 119 120 121 122 123 124 125 126 
+
+BEST: 108 5454
+AVG: 5454
+IMPROVEMENT: 96.3%
+=== Generation 17 COMPLETE ===
+
+[PLAN] Generation 18
+[CROSSOVER] 108 + 110 -> 119
+[CROSSOVER] 109 + 110 -> 122
+[CROSSOVER] 111 + 109 -> 123
+[CROSSOVER] 108 + 112 -> 125
+[CROSSOVER] 110 + 112 -> 126
+[MUTATE] 110 -> 120 (extensive)
+[MUTATE] 112 -> 121 (extensive)
+[MUTATE] 109 -> 124 (extensive)
+=== Generation 18 ===
+[EVAL] 119: 5454 cycles
+[EVAL] 120: 5582 cycles
+[EVAL] 121: 5646 cycles
+[EVAL] 122: 5454 cycles
+[EVAL] 123: 5454 cycles
+[EVAL] 124: 5454 cycles
+[EVAL] 125: 5454 cycles
+[EVAL] 126: 5454 cycles
+[SELECT] Kept: 108 109 110 111 112 113 114 116 117 118 
+[SELECT] Deleted: 119 122 123 124 125 126 120 121 
+
+BEST: 108 5454
+AVG: 5454
+IMPROVEMENT: 96.3%
+=== Generation 18 COMPLETE ===
+
+[PLAN] Generation 19
+[CROSSOVER] 110 + 112 -> 119
+[CROSSOVER] 110 + 112 -> 121
+[CROSSOVER] 110 + 111 -> 122
+[CROSSOVER] 108 + 109 -> 123
+[CROSSOVER] 110 + 111 -> 126
+[MUTATE] 110 -> 120 (extensive)
+[MUTATE] 112 -> 124 (extensive)
+[MUTATE] 112 -> 125 (extensive)
+=== Generation 19 ===
+[EVAL] 119: 5454 cycles
+[EVAL] 120: 5390 cycles
+[EVAL] 121: 5454 cycles
+[EVAL] 122: 5454 cycles
+[EVAL] 123: 5454 cycles
+[EVAL] 124: 5390 cycles
+[EVAL] 125: 5454 cycles
+[EVAL] 126: 5454 cycles
+[SELECT] Kept: 120 124 108 109 110 111 112 113 114 116 
+[SELECT] Deleted: 117 118 119 121 122 123 125 126 
+
+BEST: 120 5390
+AVG: 5441
+IMPROVEMENT: 96.4%
+=== Generation 19 COMPLETE ===
+
+[PLAN] Generation 20
+[CROSSOVER] 120 + 124 -> 127
+[CROSSOVER] 124 + 120 -> 129
+[CROSSOVER] 108 + 109 -> 131
+[CROSSOVER] 124 + 110 -> 132
+[MUTATE] 124 -> 125 (extensive)
+[MUTATE] 124 -> 126 (extensive)
+[MUTATE] 108 -> 128 (extensive)
+[MUTATE] 110 -> 130 (extensive)
+=== Generation 20 ===
+[EVAL] 125: 5390 cycles
+[EVAL] 126: 5390 cycles
+[EVAL] 127: 5326 cycles
+[EVAL] 128: 5454 cycles
+[EVAL] 129: 5454 cycles
+[EVAL] 130: 5454 cycles
+[EVAL] 131: 5454 cycles
+[EVAL] 132: 5390 cycles
+[SELECT] Kept: 127 120 124 125 126 132 108 109 110 111 
+[SELECT] Deleted: 112 113 114 116 128 129 130 131 
+
+BEST: 127 5326
+AVG: 5409
+IMPROVEMENT: 96.4%
+=== Generation 20 COMPLETE ===
+
+[PLAN] Generation 21
+[CROSSOVER] 124 + 127 -> 134
+[CROSSOVER] 125 + 120 -> 136
+[MUTATE] 127 -> 133 (extensive)
+[MUTATE] 124 -> 135 (extensive)
+[MUTATE] 126 -> 137 (extensive)
+[MUTATE] 127 -> 138 (extensive)
+[MUTATE] 126 -> 139 (extensive)
+[MUTATE] 127 -> 140 (extensive)
+=== Generation 21 ===
+[EVAL] 133: 5326 cycles
+[EVAL] 134: 5326 cycles
+[EVAL] 135: 5390 cycles
+[EVAL] 136: 5390 cycles
+[EVAL] 137: 5390 cycles
+[EVAL] 138: 5326 cycles
+[EVAL] 139: 5198 cycles
+[EVAL] 140: 5326 cycles
+[SELECT] Kept: 139 127 133 134 138 140 120 124 125 126 
+[SELECT] Deleted: 132 135 136 137 108 109 110 111 
+
+BEST: 139 5198
+AVG: 5339
+IMPROVEMENT: 96.5%
+=== Generation 21 COMPLETE ===
+
+[PLAN] Generation 22
+[CROSSOVER] 134 + 139 -> 141
+[CROSSOVER] 139 + 127 -> 145
+[CROSSOVER] 133 + 139 -> 147
+[CROSSOVER] 139 + 127 -> 148
+[MUTATE] 139 -> 142 (extensive)
+[MUTATE] 139 -> 143 (extensive)
+[MUTATE] 139 -> 144 (extensive)
+[MUTATE] 138 -> 146 (extensive)
+=== Generation 22 ===
+[EVAL] 141: 5326 cycles
+[EVAL] 142: 5134 cycles
+[EVAL] 143: 5262 cycles
+[EVAL] 144: 5698 cycles
+[EVAL] 145: 5198 cycles
+[EVAL] 146: 6606 cycles
+[EVAL] 147: 5390 cycles
+[EVAL] 148: 5198 cycles
+[SELECT] Kept: 142 139 145 148 143 127 133 134 138 140 
+[SELECT] Deleted: 141 120 124 125 126 147 144 146 
+
+BEST: 142 5134
+AVG: 5262
+IMPROVEMENT: 96.5%
+=== Generation 22 COMPLETE ===
+
+[PLAN] Generation 23
+[CROSSOVER] 139 + 145 -> 149
+[CROSSOVER] 139 + 142 -> 151
+[CROSSOVER] 145 + 139 -> 153
+[CROSSOVER] 142 + 145 -> 155
+[CROSSOVER] 142 + 148 -> 156
+[MUTATE] 142 -> 150 (extensive)
+[MUTATE] 142 -> 152 (extensive)
+[MUTATE] 139 -> 154 (extensive)
+=== Generation 23 ===
+[EVAL] 149: 5198 cycles
+[EVAL] 150: 5006 cycles
+[EVAL] 151: 5134 cycles
+[EVAL] 152: 5134 cycles
+[EVAL] 153: 5198 cycles
+[EVAL] 154: 5198 cycles
+[EVAL] 155: 5134 cycles
+[EVAL] 156: 5134 cycles
+[SELECT] Kept: 150 142 151 152 155 156 139 145 148 149 
+[SELECT] Deleted: 153 154 143 127 133 134 138 140 
+
+BEST: 150 5006
+AVG: 5147
+IMPROVEMENT: 96.6%
+=== Generation 23 COMPLETE ===
+
+[PLAN] Generation 24
+[CROSSOVER] 150 + 142 -> 157
+[CROSSOVER] 152 + 150 -> 159
+[CROSSOVER] 152 + 150 -> 160
+[CROSSOVER] 150 + 142 -> 163
+[CROSSOVER] 150 + 151 -> 164
+[MUTATE] 155 -> 158 (extensive)
+[MUTATE] 152 -> 161 (extensive)
+[MUTATE] 150 -> 162 (extensive)
+=== Generation 24 ===
+[EVAL] 157: 5134 cycles
+[EVAL] 158: 5134 cycles
+[EVAL] 159: 5006 cycles
+[EVAL] 160: 5006 cycles
+[EVAL] 161: 5134 cycles
+[EVAL] 162: 5006 cycles
+[EVAL] 163: 5134 cycles
+[EVAL] 164: 5134 cycles
+[SELECT] Kept: 150 159 160 162 142 151 152 155 156 157 
+[SELECT] Deleted: 158 161 163 164 139 145 148 149 
+
+BEST: 150 5006
+AVG: 5083
+IMPROVEMENT: 96.6%
+=== Generation 24 COMPLETE ===
+
+[PLAN] Generation 25
+[CROSSOVER] 159 + 162 -> 164
+[CROSSOVER] 150 + 160 -> 168
+[CROSSOVER] 159 + 150 -> 170
+[MUTATE] 159 -> 163 (extensive)
+[MUTATE] 150 -> 165 (extensive)
+[MUTATE] 159 -> 166 (extensive)
+[MUTATE] 160 -> 167 (extensive)
+[MUTATE] 160 -> 169 (extensive)

@@ -4,7 +4,7 @@
 
 # Population settings
 POPULATION=10
-GENERATIONS=50
+GENERATIONS=200
 OFFSPRING=8
 
 # Genetic operator rates
