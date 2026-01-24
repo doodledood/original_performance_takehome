@@ -56,9 +56,17 @@ set_state() {
     fi
 }
 
-# Helper: select random operator from file
-select_random_operator() {
-    shuf -n 1 "$OPERATORS_FILE"
+# Helper: select operator - novel with min probability, else random from file
+# NOVEL_PROB_PCT: minimum probability of selecting "novel" (default 20%)
+NOVEL_PROB_PCT=${NOVEL_PROB_PCT:-20}
+
+select_operator() {
+    local roll=$((RANDOM % 100))
+    if [ "$roll" -lt "$NOVEL_PROB_PCT" ]; then
+        echo "novel"
+    else
+        shuf -n 1 "$OPERATORS_FILE"
+    fi
 }
 
 # Helper: add operator with name-only dedup
@@ -199,7 +207,7 @@ if [ "$PHASE" = "kick" ]; then
     rm -rf "$LNS_DIR/candidates/CAND_NEIGHBOR" 2>/dev/null || true
 
     # Select random operator
-    OPERATOR=$(select_random_operator)
+    OPERATOR=$(select_operator)
     echo "KICK_ARGS: lns CURRENT NEIGHBOR $OPERATOR"
 elif [ "$PHASE" = "refine" ]; then
     echo "REFINE_ARGS: lns NEIGHBOR NEIGHBOR"

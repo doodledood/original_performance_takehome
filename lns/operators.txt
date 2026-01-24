@@ -1,4 +1,3 @@
-novel | Generate orthogonal optimization approach not covered by existing operators
 loop_tiling | Break loops into cache-friendly tiles to improve locality
 loop_fusion | Combine multiple loops into one to reduce loop overhead and improve data reuse
 memory_coalescing | Reorganize memory accesses for sequential/strided patterns
